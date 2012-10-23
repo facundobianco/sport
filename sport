@@ -1,0 +1,69 @@
+#!/bin/bash
+
+## GPLv3
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+SBOPATH=/var/lib/sbopkg/SBo/??.?
+ARCH=$(uname -m)
+
+build_pkg() {
+    local FILE=${1##*/}
+    echo $FILE
+    # TODO account for ARCH
+    ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
+    echo $ULINK
+    wget --no-clobber $ULINK
+    ./"$FILE".SlackBuild 2> /tmp/sport.log && ls /tmp/"$FILE"*SBo*t?z
+}
+
+
+if [ $# -lt 2 ]
+then
+    	echo " "
+        echo "Syntax Error. sport needs a verb and a package name:"
+	echo "sport search|cat|build|install PACKAGE"
+	echo " "
+        exit
+fi
+
+case "$1" in
+
+    search)  ls -1 $SBOPATH/*/*"$2"*.tar.* | cut -f 7- -d"/" | grep -v .tar.gz.asc 
+	# TODO make this more case-insensitive friendly
+	;;
+    cat)    
+	echo " "
+	echo "------------------------------------------"
+	cat $SBOPATH/*/"$2"/{"$2".info,README}
+	echo "------------------------------------------"
+	echo " " 
+	;;
+    build)
+	CWD=$(pwd)
+	CATEGORY=$(ls -1 $SBOPATH/*/*"$2"*.tar.* | cut -f7 -d"/" | uniq)
+	tar -xf $SBOPATH/"$CATEGORY"/"$2".tar.gz -C $SBOPATH/"$CATEGORY"/"$2"
+	cd $SBOPATH/"$CATEGORY"/"$2"
+	build_pkg "$2"
+	cd $CWD
+	;;
+    install)
+	CWD=$(pwd)
+	CATEGORY=$(ls -1 $SBOPATH/*/*"$2"*.tar.* | cut -f7 -d"/" | uniq)
+	tar -xf $SBOPATH/"$CATEGORY"/"$2".tar.gz -C $SBOPATH/"$CATEGORY"/"$2"
+	cd $SBOPATH/"$CATEGORY"/"$2"
+	build_pkg "$2"
+	installpkg /tmp/"$2"*SBo*t?z
+	cd $CWD
+	;;
+esac
