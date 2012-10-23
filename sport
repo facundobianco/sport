@@ -16,6 +16,11 @@
 
 SBOPATH=/var/lib/sbopkg/SBo/??.?
 ARCH=$(uname -m)
+NOCAPS=$(echo "$2" | tr '[:upper:]' '[:lower:]' )
+CATEGORY=$(echo "$NOCAPS" | cut -f1 -d"/")
+PKG_NAME=$(echo "$NOCAPS" | cut -f2 -d"/")
+CWD=$(pwd)
+
 
 build_pkg() {
     local FILE=${1##*/}
@@ -27,7 +32,7 @@ build_pkg() {
     ./"$FILE".SlackBuild 2> /tmp/sport.log && ls /tmp/"$FILE"*SBo*t?z
 }
 
-
+# did we get all the info we need to run this script?
 if [ $# -lt 2 ]
 then
     	echo " "
@@ -37,31 +42,25 @@ then
         exit
 fi
 
-case "$1" in
+# the script
 
-    search)  ls -1 $SBOPATH/*/*"$2"*.tar.* | cut -f 7- -d"/" | grep -v .tar.gz.asc 
-	# TODO make this more case-insensitive friendly
+case "$1" in
+    search)  ls -1 $SBOPATH/*/*"$NOCAPS"*.tar.* | cut -f 7- -d"/" | grep -v .tar.gz.asc 
 	;;
     cat)    
 	echo " "
 	echo "------------------------------------------"
-	cat $SBOPATH/*/"$2"/{"$2".info,README}
+	cat $SBOPATH/"$CATEGORY"/"$PKG_NAME"/{"$PKG_NAME".info,README}
 	echo "------------------------------------------"
 	echo " " 
 	;;
     build)
-	CWD=$(pwd)
-	CATEGORY=$(echo "$2" | cut -f1 -d"/")
-	PKG_NAME=$(echo "$2" | cut -f2 -d"/")
 	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	cd $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	build_pkg "$PKG_NAME"
 	cd $CWD
 	;;
     install)
-	CWD=$(pwd)
-	CATEGORY=$(echo "$2" | cut -f1 -d"/")
-	PKG_NAME=$(echo "$2" | cut -f2 -d"/")
 	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	cd $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	build_pkg "$PKG_NAME"
