@@ -16,23 +16,19 @@
 
 SBOPATH=/var/lib/sbopkg/SBo/??.?
 ARCH=$(uname -m)
-QUERY=$(echo "$2" | tr '[:upper:]' '[:lower:]' )
+QUERY=$(echo "$2") # | tr '[:upper:]' '[:lower:]' )
 CATEGORY=$(echo "$QUERY" | cut -f1 -d"/")
 PKG_NAME=$(echo "$QUERY" | cut -f2 -d"/")
 CWD=$(pwd)
 
-
 build_pkg() {
     local FILE=${1##*/}
-#    echo $FILE
     # TODO account for ARCH
     ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
-#    echo $ULINK
     wget --no-clobber $ULINK
-#    wget $ULINK
-    local TARBALL=$(ls -c -1 | head -n1 )
-    local MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
+    local TARBALL=$(echo "$ULINK" | rev | cut -f1 -d"/" | rev )
     local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
+    local MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
     if [ "$MD5CHECK" != "$MD5SUM" ]; then echo "O.o md5sums do not match. Exiting." && exit ; fi
     chmod +x ./"$FILE".SlackBuild
     ./"$FILE".SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
@@ -96,5 +92,12 @@ case "$1" in
 	rm -r $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	rm /tmp/"$PKG_NAME"*SBo*t?z
 	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
+	;;
+    check)
+	SLASH=$(echo "$QUERY" | grep "/")
+	if [ X$SLASH == "X" ]
+	    then ls /var/log/packages/*"$QUERY"*
+	    else ls /var/log/packages/*$(echo $SLASH | cut -f2 -d"/" )*
+	fi
 	;;
 esac
