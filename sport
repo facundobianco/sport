@@ -29,10 +29,12 @@ build_pkg() {
     ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
 #    echo $ULINK
     wget --no-clobber $ULINK
+#    wget $ULINK
     local TARBALL=$(ls -c -1 | head -n1 )
     local MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
     local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
     if [ "$MD5CHECK" != "$MD5SUM" ]; then echo "O.o md5sums do not match. Exiting." && exit ; fi
+    chmod +x ./"$FILE".SlackBuild
     ./"$FILE".SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
 }
 
@@ -63,7 +65,7 @@ fi
 # the script
 
 case "$1" in
-    search)  ls -1 $SBOPATH/*/*"$QUERY"*.tar.* | cut -f 7- -d"/" | grep -v .tar.gz.asc 
+    search) find $SBOPATH -iname *"$QUERY"*.tar.* | grep -v asc$ | rev | cut -f1,2 -d"/" | rev 
 	;;
     cat)
 	syntax_chk "$QUERY"
