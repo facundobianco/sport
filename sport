@@ -16,9 +16,9 @@
 
 SBOPATH=/var/lib/sbopkg/SBo/??.?
 ARCH=$(uname -m)
-NOCAPS=$(echo "$2" | tr '[:upper:]' '[:lower:]' )
-CATEGORY=$(echo "$NOCAPS" | cut -f1 -d"/")
-PKG_NAME=$(echo "$NOCAPS" | cut -f2 -d"/")
+QUERY=$(echo "$2" | tr '[:upper:]' '[:lower:]' )
+CATEGORY=$(echo "$QUERY" | cut -f1 -d"/")
+PKG_NAME=$(echo "$QUERY" | cut -f2 -d"/")
 CWD=$(pwd)
 
 
@@ -29,7 +29,25 @@ build_pkg() {
     ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
 #    echo $ULINK
     wget --no-clobber $ULINK
-    ./"$FILE".SlackBuild 2> /tmp/sport.log && ls /tmp/"$FILE"*SBo*t?z
+    local TARBALL=$(ls -c -1 | head -n1 )
+    local MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
+    local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
+    if [ "$MD5CHECK" != "$MD5SUM" ]; then echo "O.o md5sums do not match. Exiting." && exit ; fi
+    ./"$FILE".SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
+}
+
+syntax_chk() {
+    local CHECK=${1}
+    TEST=$(echo $CHECK | grep "/" | rev | cut -b1 )
+    if [ X$TEST == "X" ]
+    then echo "You must provide category/package not just the package name" && exit
+    fi
+}
+
+untar_pkg() {
+    if [ ! -d $SBOPATH/"$CATEGORY"/"$PKG_NAME" ] ; then
+	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
+    fi
 }
 
 # did we get all the info we need to run this script?
@@ -45,9 +63,11 @@ fi
 # the script
 
 case "$1" in
-    search)  ls -1 $SBOPATH/*/*"$NOCAPS"*.tar.* | cut -f 7- -d"/" | grep -v .tar.gz.asc 
+    search)  ls -1 $SBOPATH/*/*"$QUERY"*.tar.* | cut -f 7- -d"/" | grep -v .tar.gz.asc 
 	;;
-    cat)    
+    cat)
+	syntax_chk "$QUERY"
+	untar_pkg
 	echo " "
 	echo "------------------------------------------"
 	cat $SBOPATH/"$CATEGORY"/"$PKG_NAME"/{"$PKG_NAME".info,README}
@@ -55,16 +75,24 @@ case "$1" in
 	echo " " 
 	;;
     build)
-	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/"$PKG_NAME"
+	syntax_chk "$QUERY"
+	untar_pkg
 	cd $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	build_pkg "$PKG_NAME"
 	cd $CWD
 	;;
     install)
-	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/"$PKG_NAME"
+	syntax_chk "$QUERY"
+	untar_pkg
 	cd $SBOPATH/"$CATEGORY"/"$PKG_NAME"
 	build_pkg "$PKG_NAME"
 	installpkg /tmp/"$PKG_NAME"*SBo*t?z
 	cd $CWD
+	;;
+    clean)
+	syntax_chk "$QUERY"
+	rm -r $SBOPATH/"$CATEGORY"/"$PKG_NAME"
+	rm /tmp/"$PKG_NAME"*SBo*t?z
+	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
 	;;
 esac
