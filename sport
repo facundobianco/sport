@@ -96,8 +96,8 @@ case "$1" in
     check)
 	SLASH=$(echo "$QUERY" | grep "/")
 	if [ X$SLASH == "X" ]
-	    then ls /var/log/packages/*"$QUERY"*
-	    else ls /var/log/packages/*$(echo $SLASH | cut -f2 -d"/" )*
+	    then find /var/log/packages/ -iname *"$QUERY"*
+	    else find /var/log/packages/ -iname *$(echo $SLASH | cut -f2 -d"/" )*
 	fi
 	;;
 esac
