@@ -15,20 +15,34 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SBOPATH=/var/lib/sbopkg/SBo/??.?
-ARCH=$(uname -m)
 QUERY=$(echo "$2") # | tr '[:upper:]' '[:lower:]' )
 CATEGORY=$(echo "$QUERY" | cut -f1 -d"/")
 PKG_NAME=$(echo "$QUERY" | cut -f2 -d"/")
 CWD=$(pwd)
 
+## determine ARCH
+if [ -z "$ARCH" ]; then
+  case "$( uname -m )" in
+    i?86) SUFFIX="" ;;
+    arm*) SUFFIX="_arm" ;;
+      x86_64) SUFFIX="_x86_64" ;;
+       *) SUFFIX=$( uname -m ) ;;
+  esac
+fi
+
 build_pkg() {
     local FILE=${1##*/}
-    # TODO account for ARCH
-    ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
+    if [ X$(cat "$FILE".info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\") == "X" -a X$SUFFIX == "X_x86_64" ]
+	then 
+	ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
+	MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
+	else
+	ULINK=$(cat "$FILE".info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\" )
+	MD5CHECK=$(cat "$FILE".info | grep MD5SUM"$SUFFIX"= | cut -f2 -d\" )
+    fi
     wget --no-clobber $ULINK
     local TARBALL=$(echo "$ULINK" | rev | cut -f1 -d"/" | rev )
     local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
-    local MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
     if [ "$MD5CHECK" != "$MD5SUM" ]; then echo "O.o md5sums do not match. Exiting." && exit ; fi
     chmod +x ./"$FILE".SlackBuild
     ./"$FILE".SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
