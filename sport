@@ -15,9 +15,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SBOPATH=/var/lib/sbopkg/SBo/??.?
-QUERY=$(echo "$2") # | tr '[:upper:]' '[:lower:]' )
-CATEGORY=$(echo "$QUERY" | cut -f1 -d"/")
-PKG_NAME=$(echo "$QUERY" | cut -f2 -d"/")
+QUERY=$(basename "$2" .tar.gz )
+CATEGORY=$(basename "$QUERY" .tar.gz | cut -f1 -d"/")
+PKG_NAME=$(basename "$QUERY" .tar.gz | cut -f2 -d"/")
 CWD=$(pwd)
 
 ## determine ARCH
@@ -25,7 +25,7 @@ if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
     i?86) SUFFIX="" ;;
     arm*) SUFFIX="_arm" ;;
-      x86_64) SUFFIX="_x86_64" ;;
+  x86_64) SUFFIX="_x86_64" ;;
        *) SUFFIX=$( uname -m ) ;;
   esac
 fi
