@@ -1,0 +1,119 @@
+.\" sport - Slackware Port
+.TH "sport" "8" ""  "Klaatu" ""
+.SH "NAME"
+sport \- Search, research, and install from your collection of SlackBuilds
+.SH "SYNOPSIS"
+\fBsport\fP [command] [package]
+.SH "DESCRIPTION"
+.PP 
+\fBsport\fP, or "Slackware Port", is a BSD Port style tool that helps
+you search through your collection of SlackBuilds, read relevant files
+about each SlackBuild, and execute the build and install processes.
+.PP
+.SH USE CASE AND WORKFLOW
+The intended use of \fBsport\fP is the same as [my use of] BSD Port, although the
+exact commands are unique since the BSD Port system weilds Makefiles
+to execute its commands and SlackBuilds are shell scripts. 
+.PP
+The workflow can be similar: as root, change directory into your
+SlackBuild tree, search for the package you wish to install, and then
+build and install.
+.PP
+Strictly speaking, you do not have to change directory into your
+SlackBuilds tree, although if you're used to BSD Ports then you\'ll
+likely do that habitually. You may find it more convenient to cd into the
+SlackBuild tree, because if you do not then you must preface package
+names with the SlackBuild category where the installers are kept.
+.SH INSTALLATION
+To install sport, copy it to some directory in your path. The
+recommended location is /usr/sbin
+.PP
+You also must set the location of your SlackBuild tree by manually
+editing the sport script. You can obtain every script available on
+SlackBuilds.org tree using rsync(1). You might place your SlackBuild
+tree in /usr/slackbuilds to mimic the common BSD Ports location of
+/usr/ports or you may already have a tree in /var/lib/sbopkg/SBo/??.?
+if you are an sbopkg user.
+.PP
+Now you are ready to use sport.
+.SH COMMANDS 
+.PP
+
+.IP "\fBsearch\fP"
+Performs a fuzzy search for some package. For example\&:
+.IP
+sport search w3m\&
+.PP
+.IP "\fBcat\fP"
+Displays the README and \&.info files of some package. You want to
+do this before building, since the README provides optional dependency
+information and build instructions, and the .info file provides
+required dependencies.
+.IP
+Obviously if the package you want to install has dependencies, you
+should resolve those dependencies before continuing. Unlike the BSD
+Ports systems, \fBsport\fP does NOT resolve dependencies for you.
+.IP
+The cat command will untar the SlackBuild directory if needed.
+.IP
+If you are in your SlackBuild tree, you can just provide the path to
+the package with a dot-slash:
+.IP
+sport cat ./w3m
+.IP
+Otherwise, you must provide the path to the package from your
+SBOPATH. For instance:
+.IP
+sport cat network/w3m
+.PP
+.IP "\fBbuild\fP"
+Downloads (if needed) and executes the SlackBuild for some package. It
+does not install the resulting package, leaving it instead in whatever
+directory the SlackBuild places it (default from SlackBuilds.org is
+/tmp). Use installpkg to install the package at your leisure.
+.IP
+As with \fBcat\fP, if you are in your SlackBuild tree, you can just
+provide the path to the package with a dot-slash:
+.IP
+sport build ./w3m
+.IP
+Otherwise, you must provide the path to the package from your
+SBOPATH. For instance:
+.IP
+sport build network/w3m
+.PP
+.IP "\fBinstall\fP"
+Downloads (if needed) and executes the SlackBuild for some package,
+and then runs installpkg to install it to your system.
+.IP
+As with \fBcat\fP and \fBbuild\fP commands, you can provide the path
+from your current location if you are in your SlackBuilds tree;
+otherwise, provide the path from SBOPATH.
+.PP
+.IP "\fBclean\fP"
+Removes the directory containing the source code and SlackBuild. It of
+course leaves any compressed copy of your SlackBuild directory (the
+SlackBuild.org structure). If you are not using the SlackBuild.org
+tree, then you should either keep your originals as compressed
+archives or do you should probably not use the \fBclean\fP command.
+.PP
+.SH "SEE ALSO"
+.nf
+.I sbopkg (8)
+.I slackpkg (8)
+.I installpkg (8)
+http://slackermedia.info/sport
+http://gitorious.org/slackport
+.fi
+
+.PP
+.SH "AUTHORS"
+.nf
+Klaatu (klaatu@member.fsf.org)
+.fi
+
+.PP
+.SH "BUGS"
+Report via email or on gitorious.org. Also feel free to fix them and
+request a merge.
+.fi
