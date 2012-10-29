@@ -71,7 +71,7 @@ if [ $# -lt 2 ]
 then
     	echo " "
         echo "Syntax Error. sport needs a verb and a package name:"
-	echo "sport search|cat|build|install PACKAGE"
+	echo "sport search|cat|build|install|check PACKAGE"
 	echo " "
         exit
 fi
@@ -116,9 +116,9 @@ case "$1" in
 	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
 	;;
     check)
-	SLASH=$(echo "$QUERY" | grep "/")
+	SLASH=$(echo "$2" | grep "/")
 	if [ X$SLASH == "X" ]
-	    then find /var/log/packages/ -iname *"$QUERY"*
+	    then find /var/log/packages/ -iname *"$2"*
 	    else find /var/log/packages/ -iname *$(echo $SLASH | cut -f2 -d"/" )*
 	fi
 	;;
