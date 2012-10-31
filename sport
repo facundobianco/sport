@@ -36,20 +36,20 @@ fi
 
 build_pkg() {
     local FILE=${1##*/}
-    if [ X$(cat "$FILE".info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\") == "X" -a X$SUFFIX == "X_x86_64" ]
+    if [ X$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\") == "X" -a X$SUFFIX == "X_x86_64" ]
 	then 
-	ULINK=$(cat "$FILE".info | grep DOWNLOAD= | cut -f2 -d\" )
-	MD5CHECK=$(cat "$FILE".info | grep MD5SUM= | cut -f2 -d\" )
+	ULINK=$(cat $FILE.info | grep DOWNLOAD= | cut -f2 -d\" )
+	MD5CHECK=$(cat $FILE.info | grep MD5SUM= | cut -f2 -d\" )
 	else
-	ULINK=$(cat "$FILE".info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\" )
-	MD5CHECK=$(cat "$FILE".info | grep MD5SUM"$SUFFIX"= | cut -f2 -d\" )
+	ULINK=$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\" )
+	MD5CHECK=$(cat $FILE.info | grep MD5SUM"$SUFFIX"= | cut -f2 -d\" )
     fi
     wget --no-clobber $ULINK
     local TARBALL=$(echo "$ULINK" | rev | cut -f1 -d"/" | rev )
     local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
     if [ "$MD5CHECK" != "$MD5SUM" ]; then echo "O.o md5sums do not match. Exiting." && exit ; fi
-    chmod +x ./"$FILE".SlackBuild
-    ./"$FILE".SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
+    chmod +x ./$FILE.SlackBuild
+    ./$FILE.SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
 }
 
 syntax_chk() {
@@ -61,8 +61,8 @@ syntax_chk() {
 }
 
 untar_pkg() {
-    if [ ! -d $SBOPATH/"$CATEGORY"/"$PKG_NAME" ] ; then
-	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
+    if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
+	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz -C $SBOPATH/$CATEGORY/
     fi
 }
 
@@ -90,7 +90,7 @@ case "$1" in
 	untar_pkg
 	echo " "
 	echo "------------------------------------------"
-	cat $SBOPATH/"$CATEGORY"/"$PKG_NAME"/{"$PKG_NAME".info,README}
+	cat $SBOPATH/$CATEGORY/$PKG_NAME/{"$PKG_NAME".info,README}
 	echo "------------------------------------------"
 	echo " " 
 	;;
@@ -104,9 +104,9 @@ case "$1" in
     install)
 	syntax_chk "$2"
 	untar_pkg
-	cd $SBOPATH/"$CATEGORY"/"$PKG_NAME"
-	build_pkg "$PKG_NAME"
-	installpkg /tmp/"$PKG_NAME"*SBo*t?z
+	cd $SBOPATH/$CATEGORY/$PKG_NAME
+	build_pkg $PKG_NAME
+	installpkg /tmp/$PKG_NAME*SBo*t?z
 	cd $CWD
 	;;
     clean)
