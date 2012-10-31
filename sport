@@ -97,8 +97,8 @@ case "$1" in
     build)
 	syntax_chk "$2"
 	untar_pkg
-	cd $SBOPATH/"$CATEGORY"/"$PKG_NAME"
-	build_pkg "$PKG_NAME"
+	cd $SBOPATH/$CATEGORY/$PKG_NAME
+	build_pkg $PKG_NAME
 	cd $CWD
 	;;
     install)
@@ -111,9 +111,9 @@ case "$1" in
 	;;
     clean)
 	syntax_chk "$2"
-	rm -r $SBOPATH/"$CATEGORY"/"$PKG_NAME"
-	rm /tmp/"$PKG_NAME"*SBo*t?z
-	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
+	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
+	rm /tmp/$PKG_NAME*SBo*t?z
+	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz -C $SBOPATH/$CATEGORY/
 	;;
     check)
         CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
