@@ -1,0 +1,304 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename sport.info
+@settitle Slackware Port
+@c %**end of header
+
+@copying
+Copyright (C) 2012 Klaatu
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
+@end copying
+
+@titlepage
+@title Slackware Port
+     
+@c The following two commands start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+     
+@c Output the table of contents at the beginning.
+@contents
+
+@ifnottex
+@node Top
+@top Slackware Port
+     
+``Be a sport and use s-port!''
+
+sport is a simple shell frontend to slackbuilds.org. It is modeled
+after the BSD port system.
+
+@end ifnottex
+     
+@menu
+* Introduction::        Introduction
+* Installation::        Installing Sport
+* Usage::               Using Sport
+* FAQs::                Frequently Asked Questions
+* Index::               Complete index.
+@end menu
+
+
+@node Introduction
+@chapter Introduction
+
+@cindex about
+
+Slackware Port (sport) is a BSD Port style tool that helps
+you search through your collection of SlackBuilds, read relevant files
+about each SlackBuild, and execute the build and install processes.
+
+The most prolific and uniform collection of SlackBuilds being
+SlackBuilds.org, sport was mostly modeled after the structure of SB.o
+but technically it should work with any random collection of builds.
+
+Sport is not a package manager; this, we leave up to Slackware's built
+in toolset (ie, pkgtool). Sport is just a little tool to search,
+research, build, and install packages.
+
+@node Installation
+@chapter Installation
+
+@cindex installation
+
+If you're reading this, you've probably already installed
+sport. There is still some setup to do, however, and let's review the
+installation just to make sure you did it right.
+
+@enumerate
+@item
+You should have an executable script called sport in /usr/sbin. It is in /usr/sbin
+because it belongs to system administration, which is the rightful
+domain of the root user and wheel group.
+
+@enumerate a
+@item 
+You should have a man page in /usr/man/man8 and this info file in /usr/info/
+@end enumerate
+
+@cindex slackbuilds
+@item
+You must have a local repository of SlackBuilds. Easy access to a
+reliable and prolific collectionss is to rsync the SlackBuilds.org tree:
+
+$ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 /usr/local/share/slackbuilds'
+
+@cindex repository
+@item 
+Before you can use sport, you must define the location of your
+SlackBuild repository. Open the sport script and locate the first line after the license and set the SBOPATH variable:
+
+SBOPATH=/usr/local/share/slackbuilds/??.?
+
+@end enumerate
+
+You are now ready to use sport.
+
+@node Usage
+@chapter Usage
+
+@cindex using, howto, tutorial
+
+There are a few different ways to use sport, but it was written with
+BSD Ports in mind, so its intended workflow mimics the way that the
+BSD Handbook guides users through the intended usage of their Ports
+system.
+
+In general, the flow would be:
+
+@enumerate
+@item
+Search for a term or package name that you want to install
+
+@item
+Read about the package you find in order to learn about what libraries
+and other applications it depends on, as well as any important build
+notes
+
+@item
+Download, build, install
+
+@end enumerate
+
+These tasks are each individual commands within the sport toolset:
+
+@table @samp
+@item search
+Performs a fuzzy search for some package. For example, to search for
+any package containing the string ``firefly'':
+
+# sport search firefly
+
+A sport search is always fuzzy.
+     
+@item cat
+Displays  the  README and .info files of some package. You want to do this before
+building, since the README provides optional  dependency  information  and  build
+instructions, and the .info file provides required dependencies.
+
+Obviously if the package you want to install has dependencies, you should resolve
+those dependencies before continuing. Unlike the BSD Ports systems, sport does
+NOT resolve dependencies for you.
+
+The cat command will untar the SlackBuild directory if needed.
+
+You must provide the path  to  the  package  from  your  SBOPATH.  For instance:
+
+# sport cat games/fortune_firefly
+
+If you are in your SlackBuild tree, within the same directory as the
+SlackBuild file, you can cheat and provide the path to the package
+with a dot-slash:
+
+# sport cat ./fortune_firefly
+
+@item build
+Downloads  (if  needed) and executes the SlackBuild for some package. It does not
+install the resulting package, leaving  it  instead  in  whatever  directory  the
+SlackBuild  places  it  (default from SlackBuilds.org is /tmp). Use installpkg to
+install the package at your leisure.
+
+You  must  provide  the  path  to  the package from your SBOPATH. For instance:
+
+# sport build games/fortune_firefly
+
+If you are in the directory containing the SlackBuild you want to
+install, you can cheat and provide the path to the package with a
+dot-slash:
+
+# sport build ./fortune_firefly
+
+@item install
+Downloads (if needed) and executes the SlackBuild for some package, and then runs
+installpkg to install it to your system.
+
+As with cat and build commands, you can provide the path from your
+current location if you are in your SlackBuilds tree; otherwise,
+provide the path from SBOPATH.
+
+@item clean
+Removes the directory containing the source code and SlackBuild. It of
+course leaves any compressed copy of your SlackBuild directory (the
+SlackBuild.org structure).  If you are not using the SlackBuild.org
+tree, then you should either keep your originals as compressed
+archives or do you should probably not use the clean command.
+
+@item check
+A quick, fuzzy search through /var/log/packages to check if a package
+is already installed. This is a convenience command for when you are
+reading up on a package and want to quickly see if you already have a
+dependency installed.
+
+@end table
+
+As you can see, sport may be used from anywhere in your filesystem, or
+you can use it as you crawl through your SlackBuild tree. Just
+remember to provide the category and package name unless you happen to
+be in the same directory, in which case you can use dot-slash
+notation.
+
+@section Advanced Usage
+
+Since sport is just a BASH script, you can use the usual BASH
+conventions to add flexibility to your commands.
+
+To pass build options through sport, provide the option (usually
+defined in the README of the SlackBuild):
+
+# WIDGETS=yes sport install network/foo 
+
+To pass make flags through sport, use MAKEOPTS:
+
+# MAKEOPTS='-j8' sport install multimedia/foo 
+
+@node FAQs
+@chapter FAQs
+
+@cindex faq
+
+Here are some answers to questions that I imagine people might
+frequently ask, if they'd actually known that sport existed as I was
+writing this FAQ section:
+
+@enumerate Q
+@item
+Is sport a replacement for sbopkg?
+
+@enumerate A
+@item
+No, you will find that you will want to use sport on some days, and
+sbopkg on others, and sometimes neither! It just depends on what your
+workflow is at any given moment, or what the needs are for a
+particular package you are installing.
+
+Sport works best when you're following a dependency trail of a
+particularly complex application. Not that sbopkg couldn't do the same
+thing with its queue files, but if you like the feel of walking a
+directory tree and knocking out installs one-by-one, then sport is
+a good choice.
+
+You'll still use sbopkg for either pre-meditated install-o-ganzas (ie,
+setting up Slackermedia's 89,000 dependencies, give or take three
+zero's) or, conversely, when you're just idly browsing available
+packages because you feel the need to install something.
+@end enumerate
+@end enumerate
+
+@enumerate Q
+@item
+How do I uninstall?
+
+@enumerate A
+@item
+If you want to remove sport entirely from your system, simply remove
+the sport script from where ever you placed it (probably in
+/usr/sbin), the man page from /usr/man/man8, and this info file from
+/usr/info.
+@end enumerate
+@end enumerate
+
+@enumerate Q
+@item
+Does sport resolve dependencies for me?
+@enumerate A
+@item
+No.
+@end enumerate
+@end enumerate
+
+@enumerate Q
+@item
+When will sport be modified to resolve dependencies for me?
+@enumerate A
+@item
+Currently it is on the roadmap for Never, with the possible exception
+of the day Hell freezes over, in which case it will be brought up for review.
+@end enumerate
+@end enumerate
+
+@enumerate Q
+@item
+How can I contact the author?
+@enumerate A
+@item
+Email Klaatu at klaatu@@member.fsf.org
+@end enumerate
+@end enumerate
+
+
+@c END
+
+@node Index
+@unnumbered Index
+     
+@printindex cp
+     
+@bye
+

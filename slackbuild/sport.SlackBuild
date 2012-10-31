@@ -1,0 +1,58 @@
+#!/bin/sh
+
+# Slackware build script for S[lackware]Port
+# Written by klaatu at member dot fsf org
+
+PRGNAM=sport
+VERSION=${VERSION:-0.3}
+BUILD=${BUILD:-1}
+TAG=${TAG:-_SBo}
+ARCH=noarch
+
+CWD=$(pwd)
+TMP=${TMP:-/tmp/SBo}
+PKG=$TMP/package-$PRGNAM
+OUTPUT=${OUTPUT:-/tmp}
+
+set -e
+
+rm -rf $PKG
+mkdir -p $TMP $PKG $OUTPUT
+cd $TMP
+rm -rf $PRGNAM-$VERSION
+tar xvf $CWD/$PRGNAM-$VERSION.tar.gz
+cd $PRGNAM-$VERSION
+chown -R root:root .
+find . \
+ \( -perm 777 -o -perm 775 -o -perm 711 -o -perm 555 -o -perm 511 \) \
+ -exec chmod 755 {} \; -o \
+ \( -perm 666 -o -perm 664 -o -perm 600 -o -perm 444 -o -perm 440 -o -perm 400 \) \
+ -exec chmod 644 {} \;
+
+# sport
+mkdir -p $PKG/usr/sbin/
+cp sport $PKG/usr/sbin/
+
+# man page
+mkdir -p $PKG/usr/info/
+mkdir -p $PKG/usr/man/man8
+
+cp sport.8 $PKG/usr/man/man8/
+gzip $PKG/usr/man/man8/sport.8
+
+makeinfo sport.texinfo -o $PKG/usr/info/sport.info
+gzip $PKG/usr/info/sport.info
+
+# docs
+mkdir -p $PKG/usr/doc/$PRGNAM-$VERSION
+cp -a \
+  README \
+  $PKG/usr/doc/$PRGNAM-$VERSION
+cat $CWD/$PRGNAM.SlackBuild > $PKG/usr/doc/$PRGNAM-$VERSION/$PRGNAM.SlackBuild
+
+# Copy the slack-desc (and a custom doinst.sh if necessary) into ./install
+mkdir -p $PKG/install
+cat $CWD/slack-desc > $PKG/install/slack-desc
+
+cd $PKG
+/sbin/makepkg -l y -c n $OUTPUT/$PRGNAM-$VERSION-$ARCH-$BUILD$TAG.${PKGTYPE:-tgz}

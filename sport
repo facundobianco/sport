@@ -116,10 +116,7 @@ case "$1" in
 	tar -xf $SBOPATH/"$CATEGORY"/"$PKG_NAME".tar.gz -C $SBOPATH/"$CATEGORY"/
 	;;
     check)
-	SLASH=$(echo "$2" | grep "/")
-	if [ X$SLASH == "X" ]
-	    then find /var/log/packages/ -iname *"$2"*
-	    else find /var/log/packages/ -iname *$(echo $SLASH | cut -f2 -d"/" )*
-	fi
+        CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
+        find /var/log/packages/ -iname *"${CHECKER}"*
 	;;
 esac

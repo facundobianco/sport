@@ -1,0 +1,8 @@
+sport is a Slackware Port system based upon BSD Ports. It models
+itself after the BSD Handbook's instructions for using the Ports
+Collection,
+
+It has no dependencies apart from a normal Slackware install.
+
+http://slackermedia.info/sport
+http://gitorious.org/slackport

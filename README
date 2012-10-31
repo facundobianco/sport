@@ -1,0 +1,198 @@
+"Be a sport and use s-port!"
+
+   sport is a simple shell frontend to [8]slackbuilds.org. It is modeled
+   after the BSD port system. And no, it does not resolve dependencies.
+
+How do I install sport?
+
+   Installing sport is easy, as it is a single file. But you have to do a
+   little bit of set up as well:
+    1. First, rsync the SlackBuild tree:
+
+       $ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 \
+         /usr/local/share/slackbuilds'
+
+       Of course you can place your local repository where ever you
+       please. For instance, if you already use sbopkg, then you
+       already have a SlackBuild tree in /var/lib/sbopkg so you should
+       just use that as your SBOPATH.
+
+    2. Now download sport from [10]gitorious.org/slackport and read it
+       over.
+
+       $ git clone git://gitorious.org/slackport/sport.git
+
+    3. Install the man page:
+
+       $ su -c 'cp sport.8.gz /usr/man/man8'
+
+    4. Next, you should define the location of your slackbuild repository.
+       To do this, open up the sport script and locate the first line
+       after the license and set the SBOPATH variable:
+
+       $ SBOPATH=/usr/local/share/slackbuilds/??.*
+
+    5. Now install sport to some place in your PATH. Since it's an
+       administrative type application, I install it to /usr/sbin
+
+       $ su -c 'mv sport /usr/sbin'
+
+    6. Now you're ready to start using sport.
+
+Using sport
+
+   sport was written with the BSD port system in mind, and so it has a
+   very similar workflow:
+
+    1. If these were BSD ports and you wanted to see if you could install
+       an application via the ports collection, you might do a "make
+       search" so in sport you would do a sport search, like so:
+
+       # sport search w3m
+          network/emacs-w3m.tar.gz
+          network/w3m.tar.gz
+
+       Note that at this stage, sport is case insensitive so that your
+       search is forced to be fuzzy.
+
+    2. You might want to see some helpful information about the package
+       you are wanting to install. Note that from this point you must
+       specify the category and the package name with accurate
+       capitization, as revealed in the results of your search. Otherwise,
+       how would sport know what you want to cat or build? it's not a mind
+       reader, you know.
+
+       # sport cat network/w3m
+       PRGNAM="w3m"
+       VERSION="0.5.3"
+       HOMEPAGE="http://w3m.sourceforge.net/"
+       DOWNLOAD="http://downloads.sourceforge.net/w3m/w3m-0.5.3.tar.gz#34;
+       MD5SUM="1b845a983a50b8dec0169ac48479eacc"
+       REQUIRES="gc imlib2"
+       w3m is a blah blah blah blah
+
+    3. Uh oh, it looks like w3m depends upon gc and imlib2. So before
+       proceeding, you'll need to satisfy those dependencies, which can be
+       done exactly as we're doing here with w3m.
+       For now, let's assume we already have gc and imlib2 installed, but
+       if you did't then all you'd have to do is go back to the first step
+       and repeat it for gc, and then imlib2, and then proceed with w3m.
+
+    4. In fact, you can check to see if something is installed quite
+       easily:
+
+       # sport check imlib2    /var/log/packages/imlib2-1.4.5-x86_64-1_SBo
+
+    5. Finally, you would want to download and build the application. On
+       BSD, you'd do a "cd /path/to/foo && make install". With sport you
+       can use the build verb and Slackware's native installpkg command.
+
+       Important: notice that you must provide the category and package
+       name when installing.
+
+       # sport build network/w3m
+       # installpkg /tmp/w3m*SBo*t?z
+
+       Or you might want to download, build, and install with one command:
+
+       # sport install network/w3m
+
+   And that's all there is to it. If you're concerned about all that
+   source code lying around on your hard drive taking up space, or you
+   somehow mess up a build really badly and you want to start anew,
+   there's also sport clean foo/bar, which removes the directory and the
+   source code contained within it, and then untars a fresh copy from the
+   SBo tree.
+
+   There is no update command. If you are concerned that your SBo tree is
+   out of date, run rsync again.
+
+   I hope sport is useful to you.
+
+System Requirements
+
+   Slackware Port (sport) was designed for Slackware Linux. It uses only
+   built-in tools already included on a default full install of Slackware.
+
+
+FAQ
+
+Can I pass build options through sport?
+
+   Well, yes, since it is part of BASH you are able to pass SlackBuild
+   variables through sport:
+
+   # WIDGETS=yes sport install network/foo
+
+Can I pass make flags through sport?
+
+   Yes, using MAKEOPTS:
+
+   # MAKEOPTS='-j7' sport install multimedia/foo
+
+   Thanks to cobra2 for the tip!
+
+Is sport a replacement for sbopkg?
+
+   No, I think you will find that you will want to use sport on some days,
+   and sbopkg on others, and sometimes neither! It just depends on what
+   your workflow is at any given moment, or what the needs are for a
+   particular package you are installing.
+
+   At least for me, sport works best when I'm following a dependency trail
+   of a particularly complex application. Not that sbopkg couldn't do the
+   same thing with its queue files, but sometimes I haven't got the
+   clarity of mind to build a queue file and sort them all out, so I just
+   muddle through the SBo tree and install as I go.
+
+   I frequently use sbopkg for either pre-meditated installfests (ie,
+   setting up Slackermedia's 89,000 dependencies, give or take three
+   zero's) or, conversely, when I am just idly browsing available
+   packages.
+
+   And I use neither for those really important apps, like ffmpeg or
+   blender, which I prefer to compile on my own terms.
+
+   You will likely discover on your own which tool works best for you, in
+   different circumstances. Happily, there is no right or wrong answer;
+   they're all free!
+
+I hate it, how do I uninstall?
+
+   If you want to remove sport entirely from your system, simply remove
+   the sport script from where ever you placed it (probably in /usr/sbin).
+   Send back the unused portion to us, and we'll refund you.
+
+I love it! But it sounds too good to be true.
+
+   Then it probably is. Look, this is a simple shell script. It's not as
+   fast or robust or smart or flexible as many other Slackbuilds.org
+   frontends, and it's not my attempt at making Slackware "more user
+   friendly". It's just another tool in the shed.
+
+   sport has no allowance for queue (or "batch") files, it was written
+   swiftly and is probably very narrowly attuned for exactly what I want
+   it for. It is a dormant beast waiting until you are relaxed, and when
+   you least expect it, it will fail miserably and disappoint you.
+
+I love it, but it to be so much better.
+
+   Feel free to clone and mod sport on gitorious. If you come up with cool
+   improvements, send me a patch or a merge request!
+
+   If you don't code at all but want a better tool, then there are many
+   other frontends to Slackbuilds.org that you might want to try,
+   including the one that inspired me to write sport, called [11]sbopkg.
+   It is a robust and flexible and great system, and when I'm not using
+   sport I use it. Unfortunately, I cannot do anything about its name.
+
+I'm from the Software Police. Why did you write yet-another-package-manager?
+
+   sport is not a package manager, officer. It's a script that leverages
+   other scripts to build software from source code.
+
+Om nom nom dependency resolution?
+
+   Heavens no. I literally contemplated looking into porting BSD ports to
+   Slackware, until I realized that the one thing that annoyed me about
+   BSD ports was the dep resolution. Ergo, Slackware Port.
