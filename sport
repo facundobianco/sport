@@ -89,14 +89,15 @@ fi
 # the script
 
 case "$1" in
-    search)
-	cd $SPOPATH
-	find $SBOPATH -iname *"$2"*.tar.* \
+    search|s|-s)
+	cd $SBOPATH
+        CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
+        find $SBOPATH -iname *${CHECKER}*.tar.* \
 	    | grep -v asc$ | rev | cut -f1,2 -d"/" | rev
 	cd $CWD
 	;;
 
-    cat)
+    cat|c|-c)
 	syntax_chk "$2"
 	untar_pkg
 	echo " "
@@ -106,7 +107,7 @@ case "$1" in
 	echo " " 
 	;;
 
-    build)
+    build|b|-b)
 	syntax_chk "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
@@ -114,7 +115,7 @@ case "$1" in
 	cd $CWD
 	;;
 
-    install)
+    install|i|-i)
 	syntax_chk "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
@@ -123,7 +124,7 @@ case "$1" in
 	cd $CWD
 	;;
 
-    clean)
+    clean|l|-l)
 	syntax_chk "$2"
 	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
 	rm /tmp/$PKG_NAME*SBo*t?z
@@ -131,7 +132,7 @@ case "$1" in
 	    -C $SBOPATH/$CATEGORY/
 	;;
 
-    check)
+    check|k|-k)
         CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
         find /var/log/packages/ -iname *"${CHECKER}"*
 	;;
