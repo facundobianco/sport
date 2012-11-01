@@ -55,6 +55,14 @@ Using sport
        Note that at this stage, sport is case insensitive so that your
        search is forced to be fuzzy.
 
+       You can also use long form and short form flags. For instance,
+       all of these commands would do the same thing:
+
+       sport --search foo
+       sport search foo
+       sport -s foo
+       sport s foo
+
     2. You might want to see some helpful information about the package
        you are wanting to install. Note that from this point you must
        specify the category and the package name with accurate
@@ -62,7 +70,7 @@ Using sport
        how would sport know what you want to cat or build? it's not a mind
        reader, you know.
 
-       # sport cat network/w3m
+       # sport cat net*/w3m
        PRGNAM="w3m"
        VERSION="0.5.3"
        HOMEPAGE="http://w3m.sourceforge.net/"
@@ -81,7 +89,8 @@ Using sport
     4. In fact, you can check to see if something is installed quite
        easily:
 
-       # sport check imlib2    /var/log/packages/imlib2-1.4.5-x86_64-1_SBo
+       # sport check imlib2    
+       /var/log/packages/imlib2-1.4.5-x86_64-1_SBo
 
     5. Finally, you would want to download and build the application. On
        BSD, you'd do a "cd /path/to/foo && make install". With sport you

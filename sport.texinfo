@@ -127,7 +127,14 @@ Download, build, install
 
 @end enumerate
 
-These tasks are each individual commands within the sport toolset:
+These tasks are each individual commands within the sport toolset. For
+each flag, you can use every conceivable convention for switches. For
+example, these would all do the same thing:
+
+sport --search foo
+sport search foo
+sport s foo
+sport -s foo
 
 @table @samp
 @item search
@@ -135,6 +142,10 @@ Performs a fuzzy search for some package. For example, to search for
 any package containing the string ``firefly'':
 
 # sport search firefly
+
+or for short:
+
+# sport s firefly
 
 A sport search is always fuzzy.
      
@@ -152,6 +163,10 @@ The cat command will untar the SlackBuild directory if needed.
 You must provide the path  to  the  package  from  your  SBOPATH.  For instance:
 
 # sport cat games/fortune_firefly
+
+or just # sport c g*/fortune_firefly 
+
+if you're lazy.
 
 If you are in your SlackBuild tree, within the same directory as the
 SlackBuild file, you can cheat and provide the path to the package

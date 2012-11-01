@@ -44,14 +44,16 @@ Now you are ready to use sport.
 .SH COMMANDS 
 .PP
 
-.IP "\fBsearch\fP"
+.TP
+.B search, --search, s, -s
 Performs a fuzzy search for some package. For example\&:
 .IP
 sport search w3m\&
 .IP
 Search is always fuzzy and never needs a category or wildcard.
 .PP
-.IP "\fBcat\fP"
+.TP 
+.B cat, --cat, c, -c
 Displays the README and \&.info files of some package. You want to
 do this before building, since the README provides optional dependency
 information and build instructions, and the .info file provides
@@ -73,7 +75,8 @@ SBOPATH. For instance:
 .IP
 sport cat network/w3m
 .PP
-.IP "\fBbuild\fP"
+.TP 
+.B build, --build, b, -b
 Downloads (if needed) and executes the SlackBuild for some package. It
 does not install the resulting package, leaving it instead in whatever
 directory the SlackBuild places it (default from SlackBuilds.org is
@@ -89,7 +92,8 @@ SBOPATH. For instance:
 .IP
 sport build network/w3m
 .PP
-.IP "\fBinstall\fP"
+.TP
+.B install, --install, i, -i
 Downloads (if needed) and executes the SlackBuild for some package,
 and then calls installpkg to install it to your system.
 .IP
@@ -97,11 +101,13 @@ As with \fBcat\fP and \fBbuild\fP commands, you can provide the path
 from your current location if you are in your SlackBuilds tree;
 otherwise, provide the path from SBOPATH.
 .PP
-.IP "\fBcheck/fP"
+.TP 
+.B check, --check, k, -k
 Checks /var/log/packages to see if a package is installed. Very fuzzy
 search; not meant to replace pkgtool, just a convenience.
 .PP
-.IP "\fBclean\fP"
+.TP
+.B clean, --clean, l, -l
 Removes the directory containing the source code and SlackBuild. It of
 course leaves any compressed copy of your SlackBuild directory (the
 SlackBuild.org structure). If you are not using the SlackBuild.org
