@@ -36,20 +36,29 @@ fi
 
 build_pkg() {
     local FILE=${1##*/}
-    if [ X$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\") == "X" -a X$SUFFIX == "X_x86_64" ]
-	then 
+    if [ X$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= \
+	| cut -f2 -d\") == "X" -a X$SUFFIX == "X_x86_64" ]
+    then 
 	ULINK=$(cat $FILE.info | grep DOWNLOAD= | cut -f2 -d\" )
 	MD5CHECK=$(cat $FILE.info | grep MD5SUM= | cut -f2 -d\" )
-	else
+    else
 	ULINK=$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\" )
 	MD5CHECK=$(cat $FILE.info | grep MD5SUM"$SUFFIX"= | cut -f2 -d\" )
     fi
+
+    # download the sauce
     wget --no-clobber $ULINK
+
     local TARBALL=$(echo "$ULINK" | rev | cut -f1 -d"/" | rev )
     local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
-    if [ "$MD5CHECK" != "$MD5SUM" ]; then echo "O.o md5sums do not match. Exiting." && exit ; fi
+
+    if [ "$MD5CHECK" != "$MD5SUM" ]
+    then 
+	echo "O.o md5sums do not match. Exiting." && exit
+    fi
+
     chmod +x ./$FILE.SlackBuild
-    ./$FILE.SlackBuild 2> /tmp/sport.log #&& ls /tmp/"$FILE"*SBo*t?z
+    ./$FILE.SlackBuild 2> /tmp/sport.log
 }
 
 syntax_chk() {
@@ -62,18 +71,19 @@ syntax_chk() {
 
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
-	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz -C $SBOPATH/$CATEGORY/
+	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+	    -C $SBOPATH/$CATEGORY/
     fi
 }
 
 # did we get all the info we need to run this script?
 if [ $# -lt 2 ]
 then
-    	echo " "
-        echo "Syntax Error. sport needs a verb and a package name:"
-	echo "sport search|cat|build|install|check PACKAGE"
-	echo " "
-        exit
+    echo " "
+    echo "Syntax Error. sport needs a verb and a package name:"
+    echo "sport search|cat|build|install|check PACKAGE"
+    echo " "
+    exit
 fi
 
 # the script
@@ -81,7 +91,8 @@ fi
 case "$1" in
     search)
 	cd $SPOPATH
-	find $SBOPATH -iname *"$2"*.tar.* | grep -v asc$ | rev | cut -f1,2 -d"/" | rev
+	find $SBOPATH -iname *"$2"*.tar.* \
+	    | grep -v asc$ | rev | cut -f1,2 -d"/" | rev
 	cd $CWD
 	;;
 
@@ -94,6 +105,7 @@ case "$1" in
 	echo "------------------------------------------"
 	echo " " 
 	;;
+
     build)
 	syntax_chk "$2"
 	untar_pkg
@@ -101,6 +113,7 @@ case "$1" in
 	build_pkg $PKG_NAME
 	cd $CWD
 	;;
+
     install)
 	syntax_chk "$2"
 	untar_pkg
@@ -109,14 +122,24 @@ case "$1" in
 	installpkg /tmp/$PKG_NAME*SBo*t?z
 	cd $CWD
 	;;
+
     clean)
 	syntax_chk "$2"
 	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
 	rm /tmp/$PKG_NAME*SBo*t?z
-	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz -C $SBOPATH/$CATEGORY/
+	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+	    -C $SBOPATH/$CATEGORY/
 	;;
+
     check)
         CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
         find /var/log/packages/ -iname *"${CHECKER}"*
 	;;
+
+    *)
+    	echo " "
+        echo "Syntax Error. sport needs a verb and a package name:"
+	echo "sport search|cat|build|install|check PACKAGE"
+	echo " "
+        exit	
 esac
