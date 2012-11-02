@@ -1,0 +1,19 @@
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in.  You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':' except on otherwise blank lines.
+
+     |-----handy-ruler------------------------------------------------------|
+sport: sport (Slackware Port)
+sport:
+sport: A BSD Port -style front end to navigating, researching, and
+sport: installing SlackBuild scripts, such as the ones available from
+sport: http://slackbuilds.org
+sport:
+sport: Project homepage is http://slackermedia.info/sport
+sport:
+sport: Project git repo is http://gitorious.org/slackport
+sport:
+sport:

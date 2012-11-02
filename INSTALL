@@ -1,0 +1,2 @@
+chmod +x sport.SlackBuild
+su -c './sport.SlackBuild'
