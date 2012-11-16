@@ -108,13 +108,24 @@ arg_chk() {
 
 case "$1" in
     search|--search|s|-s)
-	arg_chk "$#"
+#	arg_chk "$#"
 	cd $SBOPATH
-        CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
-	for RESULT in $(find $SBOPATH -iname *${CHECKER}*.tar.* \
+        QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
+	for RESULT in $(find $SBOPATH -iname *${QUERY}*.tar.* \
 	    | grep -v asc$ | rev | cut -f1,2 -d"/" | rev);
 	    do echo -e "$RESULT,"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s, -t
 	cd $CWD
+	;;
+
+    list|--list|l|ls|-s)
+	if [ X"$2" != "X" ]
+	then
+        QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
+	for RESULT in $(ls $SBOPATH/$QUERY | grep tar.gz | grep -v asc$ );
+	do echo -e "$RESULT,"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s, -t
+	else
+	    ls $SBOPATH
+	fi
 	;;
 
     cat|--cat|c|-c)
