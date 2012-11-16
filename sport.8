@@ -27,14 +27,15 @@ names with the SlackBuild category where the installers are kept; for
 instance, system/qemu (if you are not in the SlackBuild tree) instead
 of just qemu (if you are in the system directory in your SlackBuild tree).
 .SH INSTALLATION
-To install sport, copy it to some directory in your path. The
-recommended location is /usr/sbin
+To install sport, use the included SlackBuild file, or just copy sport
+to some directory in your path. The recommended location is /usr/sbin
 .PP
 Copy the man page to /usr/man/man8. If you are reading this, you may
 have already done that.
 .PP
 You also must set the location of your SlackBuild tree by manually
-editing the sport script. You can obtain every script available on
+editing the sport script, and the source of that tree so that you can
+stay in sync with your source. You can obtain every script available on
 SlackBuilds.org tree using rsync(1). You might place your SlackBuild
 tree in /usr/slackbuilds to mimic the common BSD Ports location of
 /usr/ports or you may already have a tree in /var/lib/sbopkg/SBo/??.?
@@ -50,7 +51,9 @@ Performs a fuzzy search for some package. For example\&:
 .IP
 sport search w3m\&
 .IP
-Search is always fuzzy and never needs a category or wildcard.
+Search is always fuzzy and never needs a category or wildcard. It
+returns the location within your tree of all matches, plus a brief
+description.
 .PP
 .TP 
 .B cat, --cat, c, -c
@@ -113,6 +116,16 @@ course leaves any compressed copy of your SlackBuild directory (the
 SlackBuild.org structure). If you are not using the SlackBuild.org
 tree, then you should either keep your originals as compressed
 archives or do you should probably not use the \fBclean\fP command.
+.PP
+.TP
+.B rsync, --rsync, r, -r
+Synchronizes your local tree with your source tree, as defined in the
+sport script itself. By default sport is set to mimic sbopkg. If you
+are not using sbopkg then you may change this manually.
+.IP
+sport rsync
+.IP
+Would pull in any updates for your tree.
 .PP
 .SH "SEE ALSO"
 .nf

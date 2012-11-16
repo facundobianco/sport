@@ -86,16 +86,26 @@ You should have a man page in /usr/man/man8 and this info file in /usr/info/
 @cindex slackbuilds
 @item
 You must have a local repository of SlackBuilds. Easy access to a
-reliable and prolific collectionss is to rsync the SlackBuilds.org tree:
+reliable and prolific collections is to rsync the SlackBuilds.org tree:
 
 $ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 /usr/local/share/slackbuilds'
 
 @cindex repository
 @item 
 Before you can use sport, you must define the location of your
-SlackBuild repository. Open the sport script and locate the first line after the license and set the SBOPATH variable:
+SlackBuild repository. Make sure the directory exists!
 
-SBOPATH=/usr/local/share/slackbuilds/??.?
+Open the sport script and locate the first line after the license and
+set the SBOPATH and $MASTER variable:
+
+SBOPATH=/usr/local/share/slackbuilds/14.0
+
+(Note the lack of a trailing slash.)
+
+For the MASTER variable, enter the source from which any updates
+should be pulled:
+
+MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
 
 @end enumerate
 
@@ -210,6 +220,9 @@ A quick, fuzzy search through /var/log/packages to check if a package
 is already installed. This is a convenience command for when you are
 reading up on a package and want to quickly see if you already have a
 dependency installed.
+
+@item rsync
+A quick and easy way to update your SlackBuilds tree.
 
 @end table
 
