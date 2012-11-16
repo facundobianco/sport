@@ -15,7 +15,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SBOPATH=/var/lib/sbopkg/SBo/14.0
-MASTER="rsync://slackbuilds.org/slackbuilds/14.0"
+MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
 CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
 CWD=$(pwd)
