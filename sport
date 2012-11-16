@@ -113,7 +113,7 @@ case "$1" in
         CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
 	for RESULT in $(find $SBOPATH -iname *${CHECKER}*.tar.* \
 	    | grep -v asc$ | rev | cut -f1,2 -d"/" | rev);
-	    do echo -e "$RESULT : " $(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done
+	    do echo -e "$RESULT,"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s, -t
 	cd $CWD
 	;;
 
