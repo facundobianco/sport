@@ -41,6 +41,7 @@ after the BSD port system.
 * Introduction::        Introduction
 * Installation::        Installing Sport
 * Usage::               Using Sport
+* Updates::             Updating
 * FAQs::                Frequently Asked Questions
 * Index::               Complete index.
 @end menu
@@ -69,7 +70,7 @@ research, build, and install packages.
 @cindex installation
 
 If you're reading this, you've probably already installed
-sport. There is still some setup to do, however, and let's review the
+sport. There may still some setup to do, however, and let's review the
 installation just to make sure you did it right.
 
 @enumerate
@@ -78,27 +79,30 @@ You should have an executable script called sport in /usr/sbin. It is in /usr/sb
 because it belongs to system administration, which is the rightful
 domain of the root user and wheel group.
 
-@enumerate a
+@enumerate
 @item 
 You should have a man page in /usr/man/man8 and this info file in /usr/info/
 @end enumerate
 
 @cindex slackbuilds
 @item
-You must have a local repository of SlackBuilds. Easy access to a
-reliable and prolific collections is to rsync the SlackBuilds.org tree:
+You must have a local repository of SlackBuilds. If you have a
+collection that you want to use, you may; or you can gain easy access to a
+reliable and prolific collection with an rsync of the SlackBuilds.org
+tree.
 
+$ su -c 'mkdir /usr/local/share/slackbuilds'
 $ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 /usr/local/share/slackbuilds'
 
 @cindex repository
 @item 
 Before you can use sport, you must define the location of your
-SlackBuild repository. Make sure the directory exists!
+SlackBuild repository.
 
-Open the sport script and locate the first line after the license and
-set the SBOPATH and $MASTER variable:
+Open the sport script and locate the first two lines after the license and
+set the SBOPATH and MASTER variables:
 
-SBOPATH=/usr/local/share/slackbuilds/14.0
+SBOPATH=/usr/local/share/slackbuilds
 
 (Note the lack of a trailing slash.)
 
@@ -106,6 +110,8 @@ For the MASTER variable, enter the source from which any updates
 should be pulled:
 
 MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
+
+(Note the lack of a trailing slash.)
 
 @end enumerate
 
@@ -147,7 +153,7 @@ sport s foo
 sport -s foo
 
 @table @samp
-@item search
+@item search|--search|-s|s
 Performs a fuzzy search for some package. For example, to search for
 any package containing the string ``firefly'':
 
@@ -158,8 +164,20 @@ or for short:
 # sport s firefly
 
 A sport search is always fuzzy.
-     
-@item cat
+
+@item list|--list|-l|l
+Lists the contents of your SlackBuild tree. Without arguments, it
+lists everything in the base path, for example:
+
+# sport list
+
+Or you can provide a folder from within your base path:
+
+# sport list audio
+
+which will list all the packages in audio plus a description of each.
+
+@item cat|--cat|-c|c
 Displays  the  README and .info files of some package. You want to do this before
 building, since the README provides optional  dependency  information  and  build
 instructions, and the .info file provides required dependencies.
@@ -174,7 +192,9 @@ You must provide the path  to  the  package  from  your  SBOPATH.  For instance:
 
 # sport cat games/fortune_firefly
 
-or just # sport c g*/fortune_firefly 
+or just 
+
+# sport c g*/fortune_firefly 
 
 if you're lazy.
 
@@ -184,7 +204,7 @@ with a dot-slash:
 
 # sport cat ./fortune_firefly
 
-@item build
+@item build|--build|-b|b
 Downloads  (if  needed) and executes the SlackBuild for some package. It does not
 install the resulting package, leaving  it  instead  in  whatever  directory  the
 SlackBuild  places  it  (default from SlackBuilds.org is /tmp). Use installpkg to
@@ -200,7 +220,7 @@ dot-slash:
 
 # sport build ./fortune_firefly
 
-@item install
+@item install|--install|-i|i
 Downloads (if needed) and executes the SlackBuild for some package, and then runs
 installpkg to install it to your system.
 
@@ -208,20 +228,20 @@ As with cat and build commands, you can provide the path from your
 current location if you are in your SlackBuilds tree; otherwise,
 provide the path from SBOPATH.
 
-@item clean
+@item clean|--clean|-n|n
 Removes the directory containing the source code and SlackBuild. It of
 course leaves any compressed copy of your SlackBuild directory (the
 SlackBuild.org structure).  If you are not using the SlackBuild.org
 tree, then you should either keep your originals as compressed
 archives or do you should probably not use the clean command.
 
-@item check
+@item check|--check|-k|k
 A quick, fuzzy search through /var/log/packages to check if a package
 is already installed. This is a convenience command for when you are
 reading up on a package and want to quickly see if you already have a
 dependency installed.
 
-@item rsync
+@item rsync|--rsync|-r|r
 A quick and easy way to update your SlackBuilds tree.
 
 @end table
@@ -245,6 +265,23 @@ defined in the README of the SlackBuild):
 To pass make flags through sport, use MAKEOPTS:
 
 # MAKEOPTS='-j8' sport install multimedia/foo 
+
+@node Updates
+@chapter Updates
+
+Updating applications in Slackware is usually done with
+
+# upgradepkg /tmp/example-0.2-noarch-1_SBo.tgz
+
+Updating via sport is no different. For example, if version 99 of
+sport has just been released, you would download it and use sport to build
+it:
+
+# sport build ./sport.SlackBuild
+
+And then use upgradepkg to install:
+
+# upgradepkg /tmp/sport*99*tgz 
 
 @node FAQs
 @chapter FAQs
@@ -289,6 +326,11 @@ If you want to remove sport entirely from your system, simply remove
 the sport script from where ever you placed it (probably in
 /usr/sbin), the man page from /usr/man/man8, and this info file from
 /usr/info.
+
+The easiest way to do that is to use removepkg:
+
+# removepkg sport
+
 @end enumerate
 @end enumerate
 

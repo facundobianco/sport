@@ -44,7 +44,6 @@ if you are an sbopkg user.
 Now you are ready to use sport.
 .SH COMMANDS 
 .PP
-
 .TP
 .B search, --search, s, -s
 Performs a fuzzy search for some package. For example\&:
@@ -54,6 +53,20 @@ sport search w3m\&
 Search is always fuzzy and never needs a category or wildcard. It
 returns the location within your tree of all matches, plus a brief
 description.
+.PP
+.TP
+.B list, --list, l, ls, -l
+Lists the contents of your SlackBuild tree. Without arguments, it
+lists everything in the base path, for example\&:
+.IP
+sport list\&
+.IP
+Or you can provide a folder from within your base path\&:
+.IP
+sport list audio\&
+.IP
+would list all the contents of the audio directory within your
+SlackBuild tree.
 .PP
 .TP 
 .B cat, --cat, c, -c
@@ -125,8 +138,24 @@ are not using sbopkg then you may change this manually.
 .IP
 sport rsync
 .IP
-Would pull in any updates for your tree.
+Pulls in any updates for your tree via rsync.
+
+.SH UPDATES
+.TP
+Updating applications in Slackware is usually done with
 .PP
+# upgradepkg /tmp/example-0.2-noarch-1_SBo.tgz
+.PP
+Updating via sport is no different. For example, if version 99 of
+sport has just been released, you would download it and use sport to build
+it:
+.PP
+# sport build ./sport.SlackBuild
+.PP
+And then use upgradepkg to install:
+.PP
+# upgradepkg /tmp/sport*99*tgz 
+
 .SH "SEE ALSO"
 .nf
 .I sbopkg (8)
