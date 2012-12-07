@@ -82,7 +82,7 @@ build_pkg() {
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	    -C $SBOPATH/$CATEGORY/ || exit
+	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || echo "Errors were found; check the package name and maybe provide the category." && exit
     fi
 }
 
@@ -145,14 +145,25 @@ case "$1" in
 	rsync -av $MASTER $SBOPATH
 	;;
 
+    list|--list|l|ls|-l)
+        if [ X"$2" != "X" ]
+        then
+        QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
+        for RESULT in $(ls $SBOPATH/$QUERY | grep tar.gz | grep -v asc$ );
+        do echo -e "$RESULT%"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
+        else
+            ls $SBOPATH
+        fi
+        ;;
+
 # everything below needs to inherit CATEGORY
     cat|--cat|c|-c)
 	arg_chk "$#"
 	cat_finder "$2"
-	untar_pkg
+	#untar_pkg
 	echo " "
 	echo "------------------------------------------"
-	cat $SBOPATH/$CATEGORY/$PKG_NAME/{"$PKG_NAME".info,README}
+	cat $SBOPATH/$CATEGORY/*$PKG_NAME/*{.info,README}
 	echo "------------------------------------------"
 	echo " " 
 	;;

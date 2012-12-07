@@ -52,9 +52,10 @@ after the BSD port system.
 
 @cindex about
 
-Slackware Port (sport) is a BSD Port style tool that helps
-you search through your collection of SlackBuilds, read relevant files
-about each SlackBuild, and execute the build and install processes.
+Slackware Port (sport) is a BSD Port, or Gentoo Emerge, style tool
+that helps you search through your collection of SlackBuilds, read
+relevant files about each SlackBuild, and execute the build and
+install processes.
 
 The most prolific and uniform collection of SlackBuilds being
 SlackBuilds.org, sport was mostly modeled after the structure of SB.o
@@ -87,9 +88,8 @@ You should have a man page in /usr/man/man8 and this info file in /usr/info/
 @cindex slackbuilds
 @item
 You must have a local repository of SlackBuilds. If you have a
-collection that you want to use, you may; or you can gain easy access to a
-reliable and prolific collection with an rsync of the SlackBuilds.org
-tree.
+collection that you want to use, you may; or you can gain easy access
+to a reliable collection with an rsync of the SlackBuilds.org tree.
 
 $ su -c 'mkdir /usr/local/share/slackbuilds'
 $ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 /usr/local/share/slackbuilds'
@@ -97,7 +97,9 @@ $ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 /usr/local/share/sla
 @cindex repository
 @item 
 Before you can use sport, you must define the location of your
-SlackBuild repository.
+SlackBuild repository. The default values that ship with sport are the
+same as the default values for the popular sbopkg tool; if you are
+using both, you probably can skip this step.
 
 Open the sport script and locate the first two lines after the license and
 set the SBOPATH and MASTER variables:
@@ -111,7 +113,7 @@ should be pulled:
 
 MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
 
-(Note the lack of a trailing slash.)
+(Note the presence of a trailing slash.)
 
 @end enumerate
 
@@ -173,9 +175,10 @@ lists everything in the base path, for example:
 
 Or you can provide a folder from within your base path:
 
-# sport list audio
+# sport list audio | less
 
-which will list all the packages in audio plus a description of each.
+which will list all the packages in audio plus a description of
+each. You will probably want to pipe that through more or less.
 
 @item cat|--cat|-c|c
 Displays  the  README and .info files of some package. You want to do this before
@@ -186,39 +189,36 @@ Obviously if the package you want to install has dependencies, you should resolv
 those dependencies before continuing. Unlike the BSD Ports systems, sport does
 NOT resolve dependencies for you.
 
-The cat command will untar the SlackBuild directory if needed.
+# sport cat fortune_firefly
 
-You must provide the path  to  the  package  from  your  SBOPATH.  For instance:
+If there were multiple matches for what you want to research, such as
+there are, for instance, w3m, then you must be more explicit by providing the path to the
+package from your SBOPATH.
 
 # sport cat games/fortune_firefly
 
-or just 
+or just
 
-# sport c g*/fortune_firefly 
+# sport cat g*/fortune_firefly
 
 if you're lazy.
 
-If you are in your SlackBuild tree, within the same directory as the
-SlackBuild file, you can cheat and provide the path to the package
-with a dot-slash:
-
-# sport cat ./fortune_firefly
-
 @item build|--build|-b|b
-Downloads  (if  needed) and executes the SlackBuild for some package. It does not
-install the resulting package, leaving  it  instead  in  whatever  directory  the
-SlackBuild  places  it  (default from SlackBuilds.org is /tmp). Use installpkg to
-install the package at your leisure.
+Downloads (if needed) and executes the SlackBuild for some package. It
+does not install the resulting package, leaving it instead in whatever
+directory the SlackBuild places it (default from SlackBuilds.org is
+/tmp). Use installpkg to install the package at your leisure.
 
-You  must  provide  the  path  to  the package from your SBOPATH. For instance:
+All fuzziness  is abandoned at this point, so provide the canonical
+name of the package:
+
+# sport build fortune_firefly
+
+If there are multiple potential matches for the package (as there
+would be for a package like w3m, which would match both emacs-w3m and
+w3m), then provide the category as well:
 
 # sport build games/fortune_firefly
-
-If you are in the directory containing the SlackBuild you want to
-install, you can cheat and provide the path to the package with a
-dot-slash:
-
-# sport build ./fortune_firefly
 
 @item install|--install|-i|i
 Downloads (if needed) and executes the SlackBuild for some package, and then runs
@@ -246,11 +246,8 @@ A quick and easy way to update your SlackBuilds tree.
 
 @end table
 
-As you can see, sport may be used from anywhere in your filesystem, or
-you can use it as you crawl through your SlackBuild tree. Just
-remember to provide the category and package name unless you happen to
-be in the same directory, in which case you can use dot-slash
-notation.
+As you can see, sport may be used from anywhere in your filesystem, emerge-style, or
+you can use it as you crawl through your SlackBuild tree, port style.
 
 @section Advanced Usage
 

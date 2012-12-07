@@ -11,35 +11,32 @@ you search through your collection of SlackBuilds, read relevant files
 about each SlackBuild, and execute the build and install processes.
 .PP
 .SH USE CASE AND WORKFLOW
-The intended use of \fBsport\fP is the same as [my use of] BSD Port, although the
-exact commands are unique since the BSD Port system weilds Makefiles
-to execute its commands and SlackBuilds are shell scripts. 
+The intended use of \fBsport\fP is the same as [my use of] BSD Port or
+Gentoo's Emerge, although the exact commands are unique since the BSD
+Port system weilds Makefiles to execute its commands, and Gentoo uses
+ebuilds, while SlackBuilds use shell scripts.
 .PP
 The workflow can be similar: as root, change directory into your
 SlackBuild tree, search for the package you wish to install, and then
 build and install.
 .PP
-Strictly speaking, you do not have to change directory into your
+(Strictly speaking, you do not have to change directory into your
 SlackBuilds tree, although if you're used to BSD Ports then you'll
-likely do that habitually. You may find it more convenient to cd into the
-SlackBuild tree, because if you do not then you must preface package
-names with the SlackBuild category where the installers are kept; for
-instance, system/qemu (if you are not in the SlackBuild tree) instead
-of just qemu (if you are in the system directory in your SlackBuild tree).
+likely do that habitually.)
 .SH INSTALLATION
 To install sport, use the included SlackBuild file, or just copy sport
 to some directory in your path. The recommended location is /usr/sbin
 .PP
-Copy the man page to /usr/man/man8. If you are reading this, you may
-have already done that.
+Copy the man page to /usr/man/man8 and the info page to /usr/info. If
+you are reading this, you may have already done that.
 .PP
-You also must set the location of your SlackBuild tree by manually
+You might need to set the location of your SlackBuild tree by manually
 editing the sport script, and the source of that tree so that you can
 stay in sync with your source. You can obtain every script available on
 SlackBuilds.org tree using rsync(1). You might place your SlackBuild
 tree in /usr/slackbuilds to mimic the common BSD Ports location of
 /usr/ports or you may already have a tree in /var/lib/sbopkg/SBo/??.?
-if you are an sbopkg user.
+if you are already an sbopkg user.
 .PP
 Now you are ready to use sport.
 .SH COMMANDS 
@@ -63,10 +60,10 @@ sport list\&
 .IP
 Or you can provide a folder from within your base path\&:
 .IP
-sport list audio\&
+sport list audio\& | less
 .IP
 would list all the contents of the audio directory within your
-SlackBuild tree.
+SlackBuild tree. You will probably want to pipe this through less(1).
 .PP
 .TP 
 .B cat, --cat, c, -c
@@ -81,15 +78,20 @@ Ports systems, \fBsport\fP does NOT resolve dependencies for you.
 .IP
 The cat command will untar the SlackBuild directory if needed.
 .IP
-If you are in your SlackBuild tree, you can just provide the path to
-the package with a dot-slash:
+Assuming the package name is unique:
 .IP
-sport cat ./w3m
+sport cat ophcrack 
 .IP
-Otherwise, you must provide the path to the package from your
-SBOPATH. For instance:
+If there are multiple matches, then you will need to provide the path
+to the package from your SBOPATH (what Gentoo calls the "atom"); for
+instance:
 .IP
 sport cat network/w3m
+.PP
+If you are in your SlackBuild tree, you can just provide the atomic
+path to the package with a dot-slash:
+.IP
+sport cat ./w3m
 .PP
 .TP 
 .B build, --build, b, -b
@@ -98,13 +100,12 @@ does not install the resulting package, leaving it instead in whatever
 directory the SlackBuild places it (default from SlackBuilds.org is
 /tmp). Use installpkg to install the package at your leisure.
 .IP
-As with \fBcat\fP, if you are in your SlackBuild tree, you can just
-provide the path to the package with a dot-slash:
+As with \fBcat\fP, you can just provide the package name:
 .IP
 sport build ./w3m
 .IP
-Otherwise, you must provide the path to the package from your
-SBOPATH. For instance:
+Unless there are mulitple potential matches, in which case you must
+provide the path to the package from your SBOPATH. For instance:
 .IP
 sport build network/w3m
 .PP
@@ -133,8 +134,9 @@ archives or do you should probably not use the \fBclean\fP command.
 .TP
 .B rsync, --rsync, r, -r
 Synchronizes your local tree with your source tree, as defined in the
-sport script itself. By default sport is set to mimic sbopkg. If you
-are not using sbopkg then you may change this manually.
+sport script itself. By default sport is set to use the same paths
+that sbopkg institutes. If you are not using sbopkg then you may
+change this manually.
 .IP
 sport rsync
 .IP
@@ -158,7 +160,6 @@ And then use upgradepkg to install:
 
 .SH "SEE ALSO"
 .nf
-.I sbopkg (8)
 .I slackpkg (8)
 .I pkgtool (8)
 .I installpkg (8)
