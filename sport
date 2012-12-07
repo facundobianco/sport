@@ -35,10 +35,7 @@ CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
 CWD=$(pwd)
 
-## are we in the SBo tree?
-if [ X"$CATEGORY" == "X." ]
-then CATEGORY=$(basename $CWD)
-fi
+#set -e
 
 ## determine arch SUFFIX
 if [ -z "$ARCH" ]; then
@@ -69,25 +66,23 @@ build_pkg() {
 
     if [ "$MD5CHECK" != "$MD5SUM" ]
     then 
-	echo "O.o md5sums do not match. Exiting." && exit
+	echo "O.o md5sums do not match. Continue? [Y/n]"
+	read CONTINUE
+	if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
+	then exit
+	else
+	    echo "Boldly continuing with build..."
+	fi
     fi
 
     chmod +x ./$FILE.SlackBuild
     ./$FILE.SlackBuild 2> /tmp/sport.log
 }
 
-syntax_chk() {
-    local CHECK=${1}
-    TEST=$(echo $CHECK | grep "/" | rev | cut -b1 )
-    if [ X$TEST == "X" ]
- 	then CATEGORY=$(basename $CWD)
-    fi
-}
-
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	    -C $SBOPATH/$CATEGORY/
+	    -C $SBOPATH/$CATEGORY/ || exit
     fi
 }
 
@@ -104,7 +99,32 @@ arg_chk() {
     fi
 }
 
-# the script
+cat_finder() {
+    local CHECK=${1}
+    i=0
+    for COUNT in $(find $SBOPATH -iname *"$CHECK".tar.gz )
+    do let i++
+	echo $COUNT
+    done
+
+    if [ $i -gt 1 ]
+    then echo""
+    echo "More than one package matches your query."
+    echo "Please specify more clearly."
+    exit
+    else
+	SLASH=$(echo $CHECK | grep "/")
+	if [ -n "$SLASH" ]
+	then CATEGORY=$(echo $CHECK | cut -f1 -d"/")
+	else
+	    CATEGORY=$(find $SBOPATH -iname *"$CHECK".tar.gz | rev | cut -f2 -d"/" | rev )
+	fi
+    fi
+    echo $CATEGORY
+}
+
+
+### user interactions below
 
 case "$1" in
     search|--search|s|-s)
@@ -117,20 +137,19 @@ case "$1" in
 	cd $CWD
 	;;
 
-    list|--list|l|ls|-l)
-	if [ X"$2" != "X" ]
-	then
-        QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
-	for RESULT in $(ls $SBOPATH/$QUERY | grep tar.gz | grep -v asc$ );
-	do echo -e "$RESULT%"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
-	else
-	    ls $SBOPATH
-	fi
+    check|--check|k|-k)
+        CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
+        find /var/log/packages/ -iname *"${CHECKER}"*
 	;;
 
+    rsync|--rsync|r|-r)
+	rsync -av $MASTER $SBOPATH
+	;;
+
+# everything below needs to inherit CATEGORY
     cat|--cat|c|-c)
 	arg_chk "$#"
-	syntax_chk "$2"
+	cat_finder "$2"
 	untar_pkg
 	echo " "
 	echo "------------------------------------------"
@@ -141,7 +160,7 @@ case "$1" in
 
     build|--build|b|-b)
 	arg_chk "$#"
-	syntax_chk "$2"
+	cat_finder "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
 	build_pkg $PKG_NAME
@@ -150,7 +169,7 @@ case "$1" in
 
     install|--install|i|-i)
 	arg_chk "$#"
-	syntax_chk "$2"
+	cat_finder "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
 	build_pkg $PKG_NAME
@@ -160,26 +179,17 @@ case "$1" in
 
     clean|--clean|n|-n)
 	arg_chk "$#"
-	syntax_chk "$2"
+	cat_finder "$2"
 	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
 	rm /tmp/$PKG_NAME*SBo*t?z
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
 	    -C $SBOPATH/$CATEGORY/
 	;;
 
-    check|--check|k|-k)
-        CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
-        find /var/log/packages/ -iname *"${CHECKER}"*
-	;;
-
-    rsync|--rsync|r|-r)
-	rsync -av $MASTER $SBOPATH
-	;;
-
     *)
     	echo " "
         echo "Syntax Error. sport needs a verb and a package name:"
-	echo "sport search|cat|build|install|check PACKAGE"
+	echo "sport search|cat|build|install|check|rsync|clean PACKAGE"
 	echo " "
         exit	
 esac
