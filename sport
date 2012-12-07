@@ -120,7 +120,6 @@ cat_finder() {
 	    CATEGORY=$(find $SBOPATH -iname *"$CHECK".tar.gz | rev | cut -f2 -d"/" | rev )
 	fi
     fi
-    echo $CATEGORY
 }
 
 
@@ -181,7 +180,7 @@ case "$1" in
 	arg_chk "$#"
 	cat_finder "$2"
 	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
-	rm /tmp/$PKG_NAME*SBo*t?z
+	rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
 	    -C $SBOPATH/$CATEGORY/
 	;;
