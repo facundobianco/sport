@@ -323,17 +323,21 @@ directory, and pass both SBOPATH and INSTALLER variables:
 
 Updating applications in Slackware is usually done with
 
-# upgradepkg /tmp/example-0.2-noarch-1_SBo.tgz
+# upgradepkg /tmp/foo-0.2-noarch-1_SBo.tgz
 
 Updating via sport is no different. For example, if version 99 of
 sport has just been released, you would download it and use sport to build
 it:
 
-# sport build ./sport.SlackBuild
+# sport build foo
 
 And then use upgradepkg to install:
 
-# upgradepkg /tmp/sport*99*tgz 
+# upgradepkg /tmp/foo*0.2*tgz 
+
+Or as one command:
+
+# INSTALLER=upgradepkg sport build foo
 
 @node FAQs
 @chapter FAQs

@@ -97,7 +97,7 @@ arg_chk() {
     then
 	echo " "
 	echo "Syntax Error. sport needs a command and a package name:"
-	echo "sport search|cat|build|install|check PACKAGE"
+	echo "sport search|cat|build|install|queue|check PACKAGE"
 	echo " "
 	exit
     fi
