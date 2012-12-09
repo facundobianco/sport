@@ -108,6 +108,17 @@ Unless there are mulitple potential matches, in which case you must
 provide the path to the package from your SBOPATH. For instance:
 .IP
 sport build network/w3m
+.IP
+The \fBbuild\fP option is flexible and can be given an INSTALLER
+variable so that you can control what happens after the code is
+compiled. The default is to do nothing, but you could use it to
+upgrade packages:
+.IP
+INSTALLER=upgradepkg build network/w3m 
+.IP
+Or even something more complex, like:
+.IP
+INSTALLER="upgradepkg --install-new" sport b net*/w3m
 .PP
 .TP
 .B install, --install, i, -i
@@ -148,10 +159,17 @@ And to process this queue file, you would use:
 sport queue w3m.list
 .IP
 By default, sport only builds the packages and does not install
-them. To make sport install the packages after builds each one,
-pass the INSTALLER=yes variable:
+them. To make sport install the packages after it builds each one,
+pass an INSTALLER variable:
 .IP
-# INSTALLER=yes sport queue w3m.list
+INSTALLER=installpkg sport queue w3m.list
+.IP
+You can utilize this to upgrade a sequence of packages; if you are
+upgrading ffmpeg, for instance, and want to also upgrade all of its
+many codecs, you could create a queue file that will rebuild all of
+the necessary componenets:
+.IP
+INSTALLER=upgradepkg sport q ffmpeg.list
 .PP
 .TP
 .B clean, --clean, l, -l
@@ -193,8 +211,8 @@ And then use upgradepkg to install:
 .I slackpkg (8)
 .I pkgtool (8)
 .I installpkg (8)
-http://slackermedia.info/sport
-http://gitorious.org/slackport
+.URL http://slackermedia.info/sport
+.URL http://gitorious.org/slackport
 .fi
 
 .PP

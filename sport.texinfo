@@ -221,6 +221,17 @@ w3m), then provide the category as well:
 
 # sport build games/fortune_firefly
 
+The build option is pretty flexible and can be given an INSTALLER
+variable, which allows you to control what happens after the code is
+compiled. The default is to do nothing; sport just builds and
+exits. However, you could use it to upgrade a package:
+
+INSTALLER=upgradepkg build network/w3m 
+
+Or even something more complex, like:
+
+INSTALLER="upgradepkg --install-new" sport b net*/w3m
+
 @item install|--install|-i|i
 Downloads (if needed) and executes the SlackBuild for some package, and then runs
 installpkg to install it to your system.
@@ -288,9 +299,24 @@ sport process it:
 # sport queue w3m.list
 
 By default, sport only builds the packages and does not install
-them. To make sport install the packages after builds each one:
+them. To make sport install or upgrade the packages after it builds
+each one:
 
-# INSTALLER=yes sport queue w3m.list
+# INSTALLER=installpkg sport queue w3m.list
+
+or 
+
+# INSTALLER=upgradepkg sport queue w3m.list
+
+In fact, you could even keep local stashes of SlackBuilds associated
+with an important application, and use sport to upgrade the
+application frequently. For instance, if you find yourself updating
+ffmpeg with every ffmpeg release, then place the SlackBuild for ffmpeg
+and all of the codecs it needs (xvid, theora, webm, openamr,
+schroedinger, and so on) in an ``ffmpeg'' directory in your home
+directory, and pass both SBOPATH and INSTALLER variables:
+
+# SBOPATH=$(pwd) INSTALLER=upgradepkg sport q ffmpeg.list
 
 @node Updates
 @chapter Updates

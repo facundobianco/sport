@@ -18,13 +18,13 @@
 # set your SBOPATH here.       #
 # do NOT use a trailing slash. #
 ################################
-SBOPATH=/var/lib/sbopkg/SBo/14.0
+SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.0}
 
 #############################################
 # Set the source of your SlackBuild tree.   #
 # Include a trailing slash                  #
 #############################################
-MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
+MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
 
 
 #################################
@@ -32,7 +32,7 @@ MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
 #################################
 CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
-INSTALLER=${INSTALLER:-no}
+INSTALLER=${INSTALLER:-echo}
 CWD=$(pwd)
 
 #set -e
@@ -84,7 +84,9 @@ build_pkg() {
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || echo "Errors were found; check the package name and maybe provide the category." && exit
+	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || echo \
+	    "Errors were found; check the package name, and provide the category." \
+	    && exit
     fi
 }
 
@@ -130,12 +132,12 @@ cat_finder() {
 
 case "$1" in
     search|--search|s|-s)
-#	arg_chk "$#"
 	cd $SBOPATH
         QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
 	for RESULT in $(find $SBOPATH -iname *${QUERY}*.tar.* \
 	    | grep -v asc$ | rev | cut -f1,2 -d"/" | rev);
-	    do echo -e "$RESULT%"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
+	    do echo -e "$RESULT%"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | \
+		grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
 	cd $CWD
 	;;
 
@@ -153,7 +155,8 @@ case "$1" in
         then
         QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
         for RESULT in $(ls $SBOPATH/$QUERY | grep tar.gz | grep -v asc$ );
-        do echo -e "$RESULT%"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
+        do echo -e "$RESULT%"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | \
+	    grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
         else
             ls $SBOPATH
         fi
@@ -177,14 +180,15 @@ case "$1" in
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
 	build_pkg $PKG_NAME
+	$INSTALLER /tmp/$PKG_NAME*SBo*t?z
 	cd $CWD
 	;;
 
     queue|--queue|q|-q)
 	echo $(date) > /tmp/sport.queue.log 
+
 	#echo "Install packages after building? [y/N]"
 	#read CONTINUE
-
 	#if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
 	#then FINISHER="echo"
 	#else
@@ -202,12 +206,8 @@ case "$1" in
 	    cat_finder "$ITEM"
 	    cd $SBOPATH/$CATEGORY/$PKG_NAME
 	    build_pkg $PKG_NAME
-
-	    if [ X$INSTALLER == "Xyes" ]
-		then installpkg /tmp/$PKG_NAME*SBo*t?z
-		else echo "$PKG_NAME was built but not installed."
-		echo $PKG_NAME >> /tmp/sport.queue.log
-	    fi
+	    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
+	    echo $PKG_NAME >> /tmp/sport.queue.log
 
 	    cd $CWD
 	    let COUNTER++
