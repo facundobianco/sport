@@ -94,7 +94,7 @@ arg_chk() {
     if [ $CHECK -lt 2 ]
     then
 	echo " "
-	echo "Syntax Error. sport needs a verb and a package name:"
+	echo "Syntax Error. sport needs a command and a package name:"
 	echo "sport search|cat|build|install|check PACKAGE"
 	echo " "
 	exit
@@ -112,7 +112,8 @@ cat_finder() {
     if [ $i -gt 1 ]
     then echo""
     echo "More than one package matches your query."
-    echo "Please specify more clearly."
+    echo "Specify category and canonical pkg name."
+    echo "Example: sport -c games/nethack"
     exit
     else
 	SLASH=$(echo $CHECK | grep "/")
@@ -177,6 +178,35 @@ case "$1" in
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
 	build_pkg $PKG_NAME
 	cd $CWD
+	;;
+
+    queue|--queue|q|-q)
+	echo "Install packages after building? [y/N]"
+	read CONTINUE
+
+	if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
+	then FINISHER="echo"
+	else
+	    FINISHER="installpkg"
+	fi
+
+	COUNTER=1
+	LINES=$(wc -l "$2" | cut -f1 -d" " )
+	while [ $COUNTER -le $LINES ]
+	do
+	    ITEM=$(sed -n "$COUNTER"p "$2" )
+	    # override a global variable. is this legal? 
+	    # screw it, i'm doing it anyway.
+	    PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
+	    cat_finder "$ITEM"
+	    echo "debugger" $CATEGORY
+	    echo "debugger" $PKG_NAME
+	    cd $SBOPATH/$CATEGORY/$PKG_NAME
+	    build_pkg $PKG_NAME
+	    $FINISHER /tmp/$PKG_NAME*SBo*t?z
+	    cd $CWD
+	    let COUNTER++
+	done
 	;;
 
     install|--install|i|-i)
