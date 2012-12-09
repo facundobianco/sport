@@ -275,7 +275,7 @@ To pass make flags through sport, use MAKEOPTS:
 
 # MAKEOPTS='-j8' sport install multimedia/foo 
 
-@node Queue Files
+@node Queue
 @chapter Updates
 
 Sport supports queue, or batch, files. 
