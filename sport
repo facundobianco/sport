@@ -66,6 +66,8 @@ build_pkg() {
 
     if [ "$MD5CHECK" != "$MD5SUM" ]
     then 
+	echo "Expected sum " $MD5CHECK
+	echo "What we got: " $MD5SUM
 	echo "O.o md5sums do not match. Continue? [Y/n]"
 	read CONTINUE
 	if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
