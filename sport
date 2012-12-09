@@ -14,7 +14,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 ################################
 # set your SBOPATH here.       #
 # do NOT use a trailing slash. #
@@ -33,6 +32,7 @@ MASTER="rsync://slackbuilds.org/slackbuilds/14.0/"
 #################################
 CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
+INSTALLER=${INSTALLER:-no}
 CWD=$(pwd)
 
 #set -e
@@ -181,14 +181,15 @@ case "$1" in
 	;;
 
     queue|--queue|q|-q)
-	echo "Install packages after building? [y/N]"
-	read CONTINUE
+	echo $(date) > /tmp/sport.queue.log 
+	#echo "Install packages after building? [y/N]"
+	#read CONTINUE
 
-	if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
-	then FINISHER="echo"
-	else
-	    FINISHER="installpkg"
-	fi
+	#if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
+	#then FINISHER="echo"
+	#else
+	#    FINISHER="installpkg"
+	#fi
 
 	COUNTER=1
 	LINES=$(wc -l "$2" | cut -f1 -d" " )
@@ -199,11 +200,15 @@ case "$1" in
 	    # screw it, i'm doing it anyway.
 	    PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
 	    cat_finder "$ITEM"
-	    echo "debugger" $CATEGORY
-	    echo "debugger" $PKG_NAME
 	    cd $SBOPATH/$CATEGORY/$PKG_NAME
 	    build_pkg $PKG_NAME
-	    $FINISHER /tmp/$PKG_NAME*SBo*t?z
+
+	    if [ X$INSTALLER == "Xyes" ]
+		then installpkg /tmp/$PKG_NAME*SBo*t?z
+		else echo "$PKG_NAME was built but not installed."
+		echo $PKG_NAME >> /tmp/sport.queue.log
+	    fi
+
 	    cd $CWD
 	    let COUNTER++
 	done

@@ -41,6 +41,7 @@ after the BSD port system.
 * Introduction::        Introduction
 * Installation::        Installing Sport
 * Usage::               Using Sport
+* Queue::               Queue Files
 * Updates::             Updating
 * FAQs::                Frequently Asked Questions
 * Index::               Complete index.
@@ -262,6 +263,34 @@ defined in the README of the SlackBuild):
 To pass make flags through sport, use MAKEOPTS:
 
 # MAKEOPTS='-j8' sport install multimedia/foo 
+
+@node Queue Files
+@chapter Updates
+
+Sport supports queue, or batch, files. 
+
+Creating a queue file is easy. Just echo the package names into a
+plain text file, newline delimited, in the order you wish for them to
+be installed. 
+
+It is safest to use both the category and package name but if you are
+sure that the package name is unique then you can list it alone.
+
+Here is an example of a simple queue file for w3m:
+
+development/gc
+imlib2
+network/w3m
+
+Save these three lines as w3m.list (or any filename) and then have
+sport process it:
+
+# sport queue w3m.list
+
+By default, sport only builds the packages and does not install
+them. To make sport install the packages after builds each one:
+
+# INSTALLER=yes sport queue w3m.list
 
 @node Updates
 @chapter Updates

@@ -87,7 +87,7 @@ to the package from your SBOPATH (what Gentoo calls the "atom"); for
 instance:
 .IP
 sport cat network/w3m
-.PP
+.IP
 If you are in your SlackBuild tree, you can just provide the atomic
 path to the package with a dot-slash:
 .IP
@@ -122,6 +122,36 @@ otherwise, provide the path from SBOPATH.
 .B check, --check, k, -k
 Checks /var/log/packages to see if a package is installed. Very fuzzy
 search; not meant to replace pkgtool, just a convenience.
+.PP
+.TP
+.B queue, --queue, q, -q
+Processes a queue or batch file.
+.IP
+Creating a queue file is simple. Just list the packages in the order
+you wish them to be installed in a plain text file, one package per
+line. It is safest to use both the category and package name but if
+the package name is unique you can list it alone.
+.IP
+For example, in a file arbitrarily called w3m.list, you may place some
+lines of package names:
+.RS
+.sp
+development/gc
+.br
+libraries/imlib2
+.br
+network/w3m
+.RE       
+.IP
+And to process this queue file, you would use:
+.IP
+sport queue w3m.list
+.PP
+By default, sport only builds the packages and does not install
+them. To make sport install the packages after builds each one,
+pass the INSTALLER=yes variable:
+.PP
+# INSTALLER=yes sport queue w3m.list
 .PP
 .TP
 .B clean, --clean, l, -l
