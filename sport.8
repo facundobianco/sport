@@ -147,16 +147,28 @@ For example, in a file arbitrarily called w3m.list, you may place some
 lines of package names:
 .RS
 .sp
-development/gc
+gc
 .br
-libraries/imlib2
+imlib2
 .br
-network/w3m
+w3m
 .RE       
 .IP
-And to process this queue file, you would use:
+Parsing is 100% strict in a queue file so you don't have to provide
+category names if you don't want it.
+.IP
+To process this queue file, you would use:
 .IP
 sport queue w3m.list
+.IP
+You will find yourself building a queue file from top down, listing
+packages starting from the thing you actually want to install down to
+the very first thing you actually must install for the builds to
+work. In this case, you will want to process the queue file in
+reverse. The easiest way to do this is to generate an upside-down
+queue file:
+.IP
+tac w3m.list > w3m.tac && sport q w3m.tac
 .IP
 By default, sport only builds the packages and does not install
 them. To make sport install the packages after it builds each one,

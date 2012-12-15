@@ -284,8 +284,9 @@ Creating a queue file is easy. Just echo the package names into a
 plain text file, newline delimited, in the order you wish for them to
 be installed. 
 
-It is safest to use both the category and package name but if you are
-sure that the package name is unique then you can list it alone.
+It is can use both the category and package name or just the package
+name; queue processing is strictly non-fuzzy, so the category is not
+entirely necessary.
 
 Here is an example of a simple queue file for w3m:
 
@@ -297,6 +298,18 @@ Save these three lines as w3m.list (or any filename) and then have
 sport process it:
 
 # sport queue w3m.list
+
+Often you'll build a queue file from top down, meaning you'll start
+with the application you want to install, and then list the
+dependencies as you find out about them. In this case, you should
+produce an upside-down queue file:
+
+$ tac w3m.list > w3m.tac 
+
+And then process it so that it  builds the dependencies first, and
+then the application:
+
+# sport q w3m.tac
 
 By default, sport only builds the packages and does not install
 them. To make sport install or upgrade the packages after it builds

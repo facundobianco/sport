@@ -36,6 +36,7 @@ CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
 INSTALLER=${INSTALLER:-echo}
 CWD=$(pwd)
+ABS="*"
 
 #set -e
 
@@ -89,19 +90,6 @@ untar_pkg() {
 	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || echo \
 	    "Errors were found; check the package name, and provide the category." \
 	    && exit
-    fi
-}
-
-arg_chk() {
-# did we get all the info we need to run this script?
-    local CHECK=${1}
-    if [ $CHECK -lt 2 ]
-    then
-	echo " "
-	echo "Syntax Error. sport needs a command and a package name:"
-	echo "sport search|cat|build|install|queue|check PACKAGE"
-	echo " "
-	exit
     fi
 }
 
@@ -165,8 +153,6 @@ case "$1" in
 
 # everything below needs to inherit CATEGORY
     cat|--cat|c|-c)
-	arg_chk "$#"
-	ABS="*"
 	cat_finder "$2"
 	#untar_pkg
 	echo " "
@@ -177,8 +163,6 @@ case "$1" in
 	;;
 
     build|--build|b|-b)
-	arg_chk "$#"
-	ABS="*"
 	cat_finder "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
@@ -212,8 +196,6 @@ case "$1" in
 	;;
 
     install|--install|i|-i)
-	arg_chk "$#"
-	ABS="*"
 	cat_finder "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
@@ -223,8 +205,6 @@ case "$1" in
 	;;
 
     clean|--clean|n|-n)
-	arg_chk "$#"
-	ABS="*"
 	cat_finder "$2"
 	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
 	rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
@@ -234,8 +214,9 @@ case "$1" in
 
     *)
     	echo " "
-        echo "Syntax Error. sport needs a verb and a package name:"
+        echo "sport needs a subcommand and a package name:"
 	echo "sport search|cat|build|install|check|rsync|clean PACKAGE"
+	echo "try 'man sport' or 'info sport' for more"
 	echo " "
         exit	
 esac
