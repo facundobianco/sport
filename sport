@@ -19,6 +19,8 @@
 # do NOT use a trailing slash. #
 ################################
 SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.0}
+#SBOPATH=${SBOPATH:-/usr/ports}
+#SBOPATH=${SBOPATH:-/usr/slackbuilds}
 
 #############################################
 # Set the source of your SlackBuild tree.   #
@@ -106,7 +108,7 @@ arg_chk() {
 cat_finder() {
     local CHECK=${1}
     i=0
-    for COUNT in $(find $SBOPATH -iname *"$CHECK".tar.gz )
+    for COUNT in $(find $SBOPATH -iname "$ABS""$CHECK".tar.gz )
     do let i++
 	echo $COUNT
     done
@@ -122,11 +124,10 @@ cat_finder() {
 	if [ -n "$SLASH" ]
 	then CATEGORY=$(echo $CHECK | cut -f1 -d"/")
 	else
-	    CATEGORY=$(find $SBOPATH -iname *"$CHECK".tar.gz | rev | cut -f2 -d"/" | rev )
+	    CATEGORY=$(find $SBOPATH -iname "$ABS""$CHECK".tar.gz | rev | cut -f2 -d"/" | rev )
 	fi
     fi
 }
-
 
 ### user interactions below
 
@@ -165,6 +166,7 @@ case "$1" in
 # everything below needs to inherit CATEGORY
     cat|--cat|c|-c)
 	arg_chk "$#"
+	ABS="*"
 	cat_finder "$2"
 	#untar_pkg
 	echo " "
@@ -176,6 +178,7 @@ case "$1" in
 
     build|--build|b|-b)
 	arg_chk "$#"
+	ABS="*"
 	cat_finder "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
@@ -195,27 +198,22 @@ case "$1" in
 	#    FINISHER="installpkg"
 	#fi
 
-	COUNTER=1
-	LINES=$(wc -l "$2" | cut -f1 -d" " )
-	while [ $COUNTER -le $LINES ]
+	for ITEM in $(< $2)
 	do
-	    ITEM=$(sed -n "$COUNTER"p "$2" )
-	    # override a global variable. is this legal? 
-	    # screw it, i'm doing it anyway.
 	    PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
+	    ABS=""
 	    cat_finder "$ITEM"
 	    cd $SBOPATH/$CATEGORY/$PKG_NAME
 	    build_pkg $PKG_NAME
 	    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
 	    echo $PKG_NAME >> /tmp/sport.queue.log
-
 	    cd $CWD
-	    let COUNTER++
 	done
 	;;
 
     install|--install|i|-i)
 	arg_chk "$#"
+	ABS="*"
 	cat_finder "$2"
 	untar_pkg
 	cd $SBOPATH/$CATEGORY/$PKG_NAME
@@ -226,6 +224,7 @@ case "$1" in
 
     clean|--clean|n|-n)
 	arg_chk "$#"
+	ABS="*"
 	cat_finder "$2"
 	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
 	rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null

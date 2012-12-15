@@ -169,7 +169,7 @@ upgrading ffmpeg, for instance, and want to also upgrade all of its
 many codecs, you could create a queue file that will rebuild all of
 the necessary componenets:
 .IP
-INSTALLER=upgradepkg sport q ffmpeg.list
+MAKEOPTS="-j6" INSTALLER=upgradepkg sport q ffmpeg.list
 .PP
 .TP
 .B clean, --clean, l, -l
