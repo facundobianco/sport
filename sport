@@ -14,21 +14,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-################################
-# set your SBOPATH here.       #
-# do NOT use a trailing slash. #
-################################
-SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.0}
-#SBOPATH=${SBOPATH:-/usr/ports}
-#SBOPATH=${SBOPATH:-/usr/slackbuilds}
-
-#############################################
-# Set the source of your SlackBuild tree.   #
-# Include a trailing slash                  #
-#############################################
-MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
-
-
 #################################
 # End User Configuration Block  #
 #################################

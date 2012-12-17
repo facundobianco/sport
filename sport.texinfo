@@ -83,6 +83,11 @@ domain of the root user and wheel group.
 
 @enumerate
 @item 
+You should have the file /etc/sport.conf which is its sole
+configuration file
+
+@enumerate
+@item 
 You should have a man page in /usr/man/man8 and this info file in /usr/info/
 @end enumerate
 
@@ -102,12 +107,19 @@ SlackBuild repository. The default values that ship with sport are the
 same as the default values for the popular sbopkg tool; if you are
 using both, you probably can skip this step.
 
-Open the sport script and locate the first two lines after the license and
-set the SBOPATH and MASTER variables:
+In a text editor, open the sport configuration file, /etc/sport.conf,
+and set the SBOPATH and MASTER variables. For instance:
 
-SBOPATH=/usr/local/share/slackbuilds
+SBOPATH=/usr/slackbuilds
 
 (Note the lack of a trailing slash.)
+
+If you are a current user of sbopkg, you can maintain sbopkg
+compatibility by setting your SBOPATH to:
+
+SBOPATH=/usr/lib/sbopkg/SBo/xx.x
+
+where xx.x == your current Slackware version.
 
 For the MASTER variable, enter the source from which any updates
 should be pulled:

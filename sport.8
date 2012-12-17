@@ -31,12 +31,12 @@ Copy the man page to /usr/man/man8 and the info page to /usr/info. If
 you are reading this, you may have already done that.
 .PP
 You might need to set the location of your SlackBuild tree by manually
-editing the sport script, and the source of that tree so that you can
-stay in sync with your source. You can obtain every script available on
-SlackBuilds.org tree using rsync(1). You might place your SlackBuild
-tree in /usr/slackbuilds to mimic the common BSD Ports location of
-/usr/ports or you may already have a tree in /var/lib/sbopkg/SBo/??.?
-if you are already an sbopkg user.
+editing /etc/sport.conf, and the source of that tree so that you can
+stay in sync with your master branch. You can obtain every script
+available on SlackBuilds.org tree using rsync(1). You might place your
+SlackBuild tree in /usr/ports, or perhaps /usr/slackbuilds, to mimic
+the common BSD Ports location or you may already have a
+tree in /var/lib/sbopkg/SBo/??.?  if you are already an sbopkg user.
 .PP
 Now you are ready to use sport.
 .SH COMMANDS 
