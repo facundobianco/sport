@@ -14,7 +14,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-source /etc/sport.conf
+if [ -e /etc/sport.conf ]
+then source /etc/sport.conf
+else
+    SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.0}
+    MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
+fi
+
 CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
 INSTALLER=${INSTALLER:-echo}
