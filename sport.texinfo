@@ -79,11 +79,7 @@ installation just to make sure you did it right.
 @item
 You should have an executable script called sport in /usr/sbin. It is in /usr/sbin
 because it belongs to system administration, which is the rightful
-domain of the root user and wheel group.
-
-@enumerate
-@item 
-You should have the file /etc/sport.conf which is its sole
+domain of the root user and wheel group. You should also have the file /etc/sport.conf which is its sole
 configuration file
 
 @enumerate

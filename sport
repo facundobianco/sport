@@ -14,9 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#################################
-# End User Configuration Block  #
-#################################
+source /etc/sport.conf
 CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
 INSTALLER=${INSTALLER:-echo}

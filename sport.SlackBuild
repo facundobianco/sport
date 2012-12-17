@@ -32,10 +32,10 @@ find . \
  -exec chmod 644 {} \;
 
 # sport
-mkdir -p $PKG/usr/sbin/
+mkdir -p $PKG/usr/sbin/ $PKG/etc
 ##% cp sport $PKG/usr/sbin/  # uncomment for SBo
 cp $CWD/sport $PKG/usr/sbin/  # strike for SBo
-
+cp $CWD/sport.conf $PKG/etc/
 # man page
 mkdir -p $PKG/usr/info/
 mkdir -p $PKG/usr/man/man8
