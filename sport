@@ -126,6 +126,7 @@ case "$1" in
 
     rsync|--rsync|r|-r)
 	rsync -av $MASTER $SBOPATH
+	exit
 	;;
 
     list|--list|l|ls|-l)
