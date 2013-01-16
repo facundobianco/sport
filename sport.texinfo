@@ -42,6 +42,7 @@ after the BSD port system.
 * Installation::        Installing Sport
 * Usage::               Using Sport
 * Queue::               Queue Files
+* Customizing::         Customizing
 * Updates::             Updating
 * FAQs::                Frequently Asked Questions
 * Index::               Complete index.
@@ -284,7 +285,7 @@ To pass make flags through sport, use MAKEOPTS:
 # MAKEOPTS='-j8' sport install multimedia/foo 
 
 @node Queue
-@chapter Updates
+@chapter Queue
 
 Sport supports queue, or batch, files. 
 
@@ -338,6 +339,25 @@ schroedinger, and so on) in an ``ffmpeg'' directory in your home
 directory, and pass both SBOPATH and INSTALLER variables:
 
 # SBOPATH=$(pwd) INSTALLER=upgradepkg sport q ffmpeg.list
+
+@node Customizing
+@chapter Customizing
+
+Let's say you want to make some custom changes to a SlackBuild. For
+example, you might need to build GraphicsMagick without X11 support
+for a server without X libs installed.
+
+In this case, you would cd to your SlackBuilds directory, untar the
+GraphicsMagick tarball, modify the SlackBuild (with --without-x, for
+the record), and then run sport -i or sport -b. 
+
+By default, sport does not clobber an existing unarchived
+version of a SlackBuild.
+
+To clear out customized scripts, you can remove the directory manually
+or use 'sport clean', although sport clears ALL untarred directories,
+so if you have customized versions that you want to keep, you should
+not use that.
 
 @node Updates
 @chapter Updates

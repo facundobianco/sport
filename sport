@@ -32,10 +32,8 @@ ABS="*"
 ## determine arch SUFFIX
 if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
-    i?86) SUFFIX="" ;;
-    arm*) SUFFIX="_arm" ;;
   x86_64) SUFFIX="_x86_64" ;;
-       *) SUFFIX=$( uname -m ) ;;
+       *) SUFFIX="" ) ;;
   esac
 fi
 

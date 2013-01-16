@@ -4,5 +4,7 @@ Collection,
 
 It has no dependencies apart from a normal Slackware install.
 
+It is compatible with all official arches of Slackware, including ARM.
+
 http://slackermedia.info/sport
 http://gitorious.org/slackport

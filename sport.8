@@ -202,6 +202,22 @@ sport rsync
 .IP
 Pulls in any updates for your tree via rsync.
 
+.SH "CUSTOMIZING BUILD SCRIPTS"
+.TP
+Let's say you want to make some custom changes to a SlackBuild. For
+example, you might need to build GraphicsMagick without X11 support
+for a server without X libs installed.
+.TP
+In this case, you would cd to your SlackBuilds directory, untar the
+GraphicsMagick tarball, modify the SlackBuild, and then run sport -i
+or sport -b. By default, sport does not clobber an existing unarchived
+version of a SlackBuild.
+.PP
+To clear out customized scripts, you can remove the directory manually
+or use 'sport clean', although sport clears ALL untarred directories,
+so if you have customized versions that you want to keep, you should
+not use that.
+
 .SH UPDATES
 .TP
 Updating applications in Slackware is usually done with

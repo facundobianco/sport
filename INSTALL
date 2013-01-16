@@ -1,2 +1,2 @@
 chmod +x sport.SlackBuild
-su -c './sport.SlackBuild'
+su -c './sport.SlackBuild && installpkg /tmp/sport*tgz'
