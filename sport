@@ -33,7 +33,7 @@ ABS="*"
 if [ -z "$ARCH" ]; then
   case "$( uname -m )" in
   x86_64) SUFFIX="_x86_64" ;;
-       *) SUFFIX="" ) ;;
+       *) SUFFIX="" ;;
   esac
 fi
 
