@@ -35,7 +35,14 @@ find . \
 mkdir -p $PKG/usr/sbin/ $PKG/etc
 ##% cp sport $PKG/usr/sbin/  # uncomment for SBo
 cp $CWD/sport $PKG/usr/sbin/  # strike for SBo
+
+if [ -e /etc/sport.conf ]
+then
+cp $CWD/sport.conf $PKG/etc/sport.conf-default
+else
 cp $CWD/sport.conf $PKG/etc/
+fi
+
 # man page
 mkdir -p $PKG/usr/info/
 mkdir -p $PKG/usr/man/man8
