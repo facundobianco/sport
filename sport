@@ -21,10 +21,6 @@ else
     MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
 fi
 
-test -d $SBOPATH || mkdir -p $SBOPATH
-echo "wait"
-read CONTINUE
-
 CATEGORY=$(echo "$2" | cut -f1 -d"/")
 PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
 INSTALLER=${INSTALLER:-echo}
@@ -127,6 +123,7 @@ case "$1" in
 	;;
 
     rsync|--rsync|r|-r)
+	test -d $SBOPATH || mkdir -p $SBOPATH
 	rsync -av $MASTER $SBOPATH
 	exit
 	;;
