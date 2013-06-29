@@ -1,0 +1,14 @@
+sport -*- mode: org -*-
+
+This programme is not yet complete.
+
+* TODO parse flags with shift
+
+* TODO parse multiple install arguments, ie sport i foo bar baz
+
+* TODO make it possible to bump version number of install target
+
+* TODO bug fix the queue file thing. not working 100%
+
+* TODO bug fix multiple install downloads in foo.info file
+
