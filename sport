@@ -128,8 +128,8 @@ elif [ "$1" = "rsync" -o "$1" = "--rsync" -o "$1" = "-r" -o "$1" = "r" ]; then
 #	echo "Rsync done"
 	echo "pretend like rsync happened"
     shift 1
-elif [ "$1" = "build" -o "$1" = "--build" -o "$1" = "-b" -o "$1" = "b" ]; then
-    MODE=buildmode
+elif [ "$1" = "build" -o "$1" = "--build-only" -o "$1" = "-b" -o "$1" = "b" ]; then
+    buildmode=1
     shift 1
 elif [ "$1" = "clean" -o "$1" = "--clean" -o "$1" = "-n" -o "$1" = "n" ]; then 
     cleanmode=1
@@ -253,16 +253,9 @@ while [ True ]; do
 	    untar_pkg
 	    cd $SBOPATH/$CATEGORY/$PKG_NAME
 	    build_pkg $PKG_NAME
-	    installpkg /tmp/$PKG_NAME*SBo*t?z
-	    cd $CWD
-	fi
-
-	if [ "X$MODE" == "Xbuildmode" ]; then
-	    cat_finder "$item"
-	    untar_pkg
-	    cd $SBOPATH/$CATEGORY/$PKG_NAME
-	    build_pkg $PKG_NAME
-	    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
+	    if [ "X$buildmode" != "X1" ]; then
+		installpkg /tmp/$PKG_NAME*SBo*t?z
+	    fi
 	    cd $CWD
 	fi
 
