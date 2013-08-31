@@ -101,6 +101,19 @@ cat_finder() {
     fi
 }
 
+local_finder() {
+	    if [ "X$item" != "X." ]; then
+		cat_finder "$item"
+		untar_pkg
+	    else
+		item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
+		SBOPATH=.
+		CATEGORY=.
+		PKG_NAME=${item}
+		echo "Working from current directory."
+	    fi
+}
+
 ### user interactions below
 while [ True ]; do
 if [ "$1" = "search" -o "$1" = "--search" -o "$1" = "-s" -o "$1" = "s" ]; then 
@@ -171,8 +184,9 @@ while [ True ]; do
 	fi
 
 	if [ "X$MODE" == "Xcheckmode" ]; then
+	    local_finder
 	    CHECKER=$(echo "$item" | rev | cut -f1 -d"/" | rev)
-            find /var/log/packages/ -iname *"${CHECKER}"*
+            find /var/log/packages/ -iname "*${CHECKER}*"
 	fi
     
 	if [ "X$MODE" == "Xlistmode" ]; then
@@ -188,10 +202,14 @@ while [ True ]; do
 	fi
 	
 	if [ "X$MODE" == "Xcatmode" ]; then
-	    cat_finder "$item"
+	    local_finder
 	    echo " "
 	    echo "------------------------------------------"
-	    cat $SBOPATH/$CATEGORY/*$PKG_NAME/*{.info,README}
+	    if [ "X$CATEGORY" == "X." ]; then
+		cat *{.info,README}
+	    else
+		cat $SBOPATH/$CATEGORY/*$PKG_NAME/*{.info,README}
+	    fi
 	    echo "------------------------------------------"
 	    echo " " 
 	fi
@@ -221,9 +239,15 @@ while [ True ]; do
 	fi
 
 	if [ "X$MODE" == "Xinstallmode" ]; then
-	    cat_finder "$item"
-	    untar_pkg
-	    cd $SBOPATH/$CATEGORY/$PKG_NAME
+	    local_finder
+
+	    START=$(find . -iname $item.SlackBuild)
+	    if [ "X$START" == "X" ]; then
+		cd $SBOPATH/$CATEGORY/$PKG_NAME
+	    else
+		echo "Working in current directory"
+	    fi
+
 	    build_pkg $PKG_NAME
 	    if [ "X$buildmode" != "X1" ]; then
 		installpkg /tmp/$PKG_NAME*SBo*t?z
