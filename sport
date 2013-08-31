@@ -123,65 +123,35 @@ elif [ "$1" = "install" -o "$1" = "--install" -o "$1" = "-i" -o "$1" = "i" ]; th
     shift 1
 elif [ "$1" = "rsync" -o "$1" = "--rsync" -o "$1" = "-r" -o "$1" = "r" ]; then 
     rsyncmode=1
-#	test -d $SBOPATH || mkdir -p $SBOPATH
-#	rsync -av $MASTER $SBOPATH
-#	echo "Rsync done"
-	echo "pretend like rsync happened"
+    test -d $SBOPATH || mkdir -p $SBOPATH
+    rsync -av $MASTER $SBOPATH
     shift 1
-elif [ "$1" = "build" -o "$1" = "--build-only" -o "$1" = "-b" -o "$1" = "b" ]; then
+elif [ "$1" = "build-only" -o "$1" = "build" -o "$1" = "--build-only" -o "$1" = "-b" -o "$1" = "b" ]; then
     buildmode=1
     shift 1
 elif [ "$1" = "clean" -o "$1" = "--clean" -o "$1" = "-n" -o "$1" = "n" ]; then 
     cleanmode=1
-    echo "clean like clean happened"
-#	cat_finder "$item"
-#	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
-#	rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
-#	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-#	    -C $SBOPATH/$CATEGORY/
+    cat_finder "$item"
+    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
+    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
+    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+	-C $SBOPATH/$CATEGORY/
     shift 1
 else
     break
 fi
 done
 
-#echo "at position 1: $1"
-#echo "at position 2: $2"
-
 # everything else left at this point
 # SHOULD be a package name, so..
 # build an array of packages
 ARG=(${@})
 
-#debug
-#    echo "now we have build an array"
-#    echo "Array size ${#ARG[*]}"
-#    echo "Array indexes:"
-#    for index in ${!ARG[*]}
-#    do
-#	printf "   %d\n" $index
-#    done
-#    echo "Array items and indexes:"
-#    for index in ${!ARG[*]}
-#    do
-#	printf "%4d: %s\n" $index ${ARG[$index]}
-#    done
-#    echo "Array items:"
-#    for item in ${ARG[*]}
-#    do
-#	echo $item
-#    done
-#for index in ${!ARG[*]}
-#do
-#    printf "   %d\n" $index
-#done
-#debug-end
-
-
 ###### Main Loop
 n=0
 while [ True ]; do
     for item in ${ARG[@]}; do
+
 	CATEGORY=$(echo "$item" | cut -f1 -d"/")
 	PKG_NAME=$(basename "$item" .tar.gz | cut -f2 -d"/")
 
@@ -191,6 +161,9 @@ while [ True ]; do
 	if [ "X$MODE" == "Xsearchmode" ]; then
 	    cd $SBOPATH
             QUERY=$(echo "$item" | rev | cut -f1 -d"/" | rev)
+	    # this separates searches when multiple searches are performed
+	    # you can remove it if it bugs you
+	    echo "---------------$QUERY---------------------------"
 	    for RESULT in $(find $SBOPATH -iname "*${QUERY}*.tar.*" | grep -v asc$ | rev | cut -f1,2 -d"/" | rev); do
 		echo -e "$RESULT%"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | \
 		    grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
@@ -216,7 +189,6 @@ while [ True ]; do
 	
 	if [ "X$MODE" == "Xcatmode" ]; then
 	    cat_finder "$item"
-	#untar_pkg
 	    echo " "
 	    echo "------------------------------------------"
 	    cat $SBOPATH/$CATEGORY/*$PKG_NAME/*{.info,README}
