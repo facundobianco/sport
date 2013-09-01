@@ -21,7 +21,6 @@ else
     MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
 fi
 
-INSTALLER=${INSTALLER:-echo}
 CWD=$(pwd)
 ABS="*"
 
@@ -33,6 +32,14 @@ if [ -z "$ARCH" ]; then
   x86_64) SUFFIX="_x86_64" ;;
        *) SUFFIX="" ;;
   esac
+fi
+
+## are we cleaning up after we are done?
+## this catches a straggler "clean" command after all args
+## i figure BSD'ers might do this by force of habit
+CLN=$(echo ${@} | rev | cut -f1 -d" ")
+if [ "$CLN" = "naelc" -o "$CLN" = "naelc--" -o "$CLN" = "n-" -o "$CLN" = "n" ]; then 
+    cleanmode=2
 fi
 
 build_pkg() {
@@ -72,9 +79,11 @@ build_pkg() {
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || echo \
-	    "Errors were found; check the package name, and provide the category." \
-	    && exit
+	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || \
+	    if [ "X$cleanmode" != "X2" ]; then
+	    echo "Errors were found; check the package name, and provide the category."
+	    fi
+	exit
     fi
 }
 
@@ -130,9 +139,11 @@ elif [ "$1" = "cat" -o "$1" = "--cat" -o "$1" = "-c" -o "$1" = "c" ]; then
     shift 1
 elif [ "$1" = "queue" -o "$1" = "--queue" -o "$1" = "-q" -o "$1" = "q" ]; then 
     MODE=queuemode
+    INSTALLER=${INSTALLER:-echo}
     shift 1
 elif [ "$1" = "install" -o "$1" = "--install" -o "$1" = "-i" -o "$1" = "i" ]; then 
     MODE=installmode
+    INSTALLER=${INSTALLER:-installpkg}
     shift 1
 elif [ "$1" = "rsync" -o "$1" = "--rsync" -o "$1" = "-r" -o "$1" = "r" ]; then 
     rsyncmode=1
@@ -141,14 +152,10 @@ elif [ "$1" = "rsync" -o "$1" = "--rsync" -o "$1" = "-r" -o "$1" = "r" ]; then
     shift 1
 elif [ "$1" = "build-only" -o "$1" = "build" -o "$1" = "--build-only" -o "$1" = "-b" -o "$1" = "b" ]; then
     buildmode=1
+    INSTALLER=${INSTALLER:-echo}
     shift 1
 elif [ "$1" = "clean" -o "$1" = "--clean" -o "$1" = "-n" -o "$1" = "n" ]; then 
     cleanmode=1
-    cat_finder "$item"
-    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
-    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
-    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	-C $SBOPATH/$CATEGORY/
     shift 1
 else
     break
@@ -162,6 +169,7 @@ ARG=(${@})
 
 ###### Main Loop
 n=0
+
 while [ True ]; do
     for item in ${ARG[@]}; do
 
@@ -217,14 +225,6 @@ while [ True ]; do
 	if [ "X$MODE" == "Xqueuemode" ]; then
 	    echo $(date) > /tmp/sport.queue.log 
 
-	#echo "Install packages after building? [y/N]"
-	#read CONTINUE
-	#if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
-	#then FINISHER="echo"
-	#else
-	#    FINISHER="installpkg"
-	#fi
-
 	    for ITEM in $(< $item)
 	    do
 		PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
@@ -232,7 +232,9 @@ while [ True ]; do
 		cat_finder "$ITEM"
 		cd $SBOPATH/$CATEGORY/$PKG_NAME
 		build_pkg $PKG_NAME
-		$INSTALLER /tmp/$PKG_NAME*SBo*t?z
+		if [ "X$buildmode" != "X1" ]; then
+		    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
+		fi
 		echo $PKG_NAME >> /tmp/sport.queue.log
 		cd $CWD
 	    done
@@ -250,7 +252,7 @@ while [ True ]; do
 
 	    build_pkg $PKG_NAME
 	    if [ "X$buildmode" != "X1" ]; then
-		installpkg /tmp/$PKG_NAME*SBo*t?z
+		$INSTALLER /tmp/$PKG_NAME*SBo*t?z
 	    fi
 	    cd $CWD
 	fi
@@ -260,5 +262,16 @@ while [ True ]; do
 	    exit
 	fi
 
+if [ "$cleanmode" -ge "1" ]; then
+    cat_finder "$item"
+    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
+    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
+    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+	-C $SBOPATH/$CATEGORY/
+fi
+
     done
+
+
 done
+

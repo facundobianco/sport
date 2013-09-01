@@ -39,10 +39,9 @@ the common BSD Ports location or you may already have a
 tree in /var/lib/sbopkg/SBo/??.?  if you are already an sbopkg user.
 .PP
 Now you are ready to use sport.
-.SH COMMANDS 
-.PP
-.TP
+.SH COMMANDS
 .B search, --search, s, -s
+.IP
 Performs a fuzzy search for some package. For example\&:
 .IP
 sport search w3m\&
@@ -50,7 +49,6 @@ sport search w3m\&
 Search is always fuzzy and never needs a category or wildcard. It
 returns the location within your tree of all matches, plus a brief
 description.
-.PP
 .TP
 .B list, --list, l, ls, -l
 Lists the contents of your SlackBuild tree. Without arguments, it
@@ -80,60 +78,66 @@ The cat command will untar the SlackBuild directory if needed.
 .IP
 Assuming the package name is unique:
 .IP
-sport cat ophcrack 
+# sport cat ophcrack 
 .IP
 If there are multiple matches, then you will need to provide the path
 to the package from your SBOPATH (what Gentoo calls the "atom"); for
 instance:
 .IP
-sport cat network/w3m
+# sport cat network/w3m
 .IP
 If you are in your SlackBuild tree, you can just provide the atomic
 path to the package with a dot-slash:
 .IP
-sport cat ./w3m
-.PP
-.TP 
-.B build, --build, b, -b
-Downloads (if needed) and executes the SlackBuild for some package. It
-does not install the resulting package, leaving it instead in whatever
-directory the SlackBuild places it (default from SlackBuilds.org is
-/tmp). Use installpkg to install the package at your leisure.
+# sport cat ./w3m
+.IP
+You can also provide the current directory as an argument, if you are
+currently located in the directory containing the files you with to
+cat:
+.IP
+# sport cat .
+.IP 
+# sport install --build-only network/w3m
+.TP
+.B install, --install, i, -i
+Downloads the source code (if needed) and executes the SlackBuild for
+some package or list of packages, and then by default calls installpkg
+to install it to your system.
+.IP
+As with the \fBcat\fP subcommand, you can provide the path from your
+current location if you are in your SlackBuilds tree; otherwise,
+provide the path from SBOPATH.
+.IP
+You can provide a single package name or a list of packages:
+.IP
+# sport install python-daemon numpy network/w3m
+.IP
+The \fBinstall\fP option is flexible and can be given an INSTALLER
+variable so that you can control what happens after the code is
+compiled. The default is to call installpkg, but you could use it to
+upgrade packages instead:
+.IP
+# INSTALLER=upgradepkg install network/w3m 
+.IP
+Or even something more complex, like:
+.IP
+# INSTALLER="upgradepkg --install-new" sport i net*/w3m
+.B build, --build-only, b, -b
+Instead of installing, this only builds the packages, leaving them in
+the build directory, never invoking installpkg(8). This is useful if
+you run sport on a separate build machine.
 .IP
 As with \fBcat\fP, you can just provide the package name:
 .IP
-sport build ./w3m
+# sport install --build-only ./w3m
 .IP
 Unless there are mulitple potential matches, in which case you must
 provide the path to the package from your SBOPATH. For instance:
 .IP
-sport build network/w3m
-.IP
-The \fBbuild\fP option is flexible and can be given an INSTALLER
-variable so that you can control what happens after the code is
-compiled. The default is to do nothing, but you could use it to
-upgrade packages:
-.IP
-INSTALLER=upgradepkg build network/w3m 
-.IP
-Or even something more complex, like:
-.IP
-INSTALLER="upgradepkg --install-new" sport b net*/w3m
-.PP
-.TP
-.B install, --install, i, -i
-Downloads (if needed) and executes the SlackBuild for some package,
-and then calls installpkg to install it to your system.
-.IP
-As with \fBcat\fP and \fBbuild\fP commands, you can provide the path
-from your current location if you are in your SlackBuilds tree;
-otherwise, provide the path from SBOPATH.
-.PP
 .TP 
 .B check, --check, k, -k
 Checks /var/log/packages to see if a package is installed. Very fuzzy
 search; not meant to replace pkgtool, just a convenience.
-.PP
 .TP
 .B queue, --queue, q, -q
 Processes a queue or batch file.
@@ -159,55 +163,67 @@ category names if you don't want it.
 .IP
 To process this queue file, you would use:
 .IP
-sport queue w3m.list
+# sport queue w3m.list
 .IP
-You will find yourself building a queue file from top down, listing
-packages starting from the thing you actually want to install down to
-the very first thing you actually must install for the builds to
-work. In this case, you will want to process the queue file in
+You will probably find yourself building a queue file from top down,
+listing packages starting from the thing you actually want to install
+down to the very first thing you actually must install for the builds
+to work. In this case, you will want to process the queue file in
 reverse. The easiest way to do this is to generate an upside-down
 queue file:
 .IP
-tac w3m.list > w3m.tac && sport q w3m.tac
+# tac w3m.list > w3m.tac && sport q w3m.tac
 .IP
-By default, sport only builds the packages and does not install
+By default, sport only builds the packages in a queue and does not install
 them. To make sport install the packages after it builds each one,
 pass an INSTALLER variable:
 .IP
-INSTALLER=installpkg sport queue w3m.list
+# INSTALLER=installpkg sport queue w3m.list
 .IP
 You can utilize this to upgrade a sequence of packages; if you are
 upgrading ffmpeg, for instance, and want to also upgrade all of its
 many codecs, you could create a queue file that will rebuild all of
 the necessary componenets:
 .IP
-MAKEOPTS="-j6" INSTALLER=upgradepkg sport q ffmpeg.list
+# MAKEOPTS="-j6" INSTALLER=upgradepkg sport q ffmpeg.list
 .PP
 .TP
-.B clean, --clean, l, -l
+.B clean, --clean, n, -n
 Removes the directory containing the source code and SlackBuild. It of
 course leaves any compressed copy of your SlackBuild directory (the
 SlackBuild.org structure). If you are not using the SlackBuild.org
 tree, then you should either keep your originals as compressed
 archives or do you should probably not use the \fBclean\fP command.
-.PP
+.IP
+The order in which you use \fBclean\fP matters. Do you want to clean the
+sources first and then install? 
+.IP
+# sport clean install numpy
+.IP
+Or do you mean to install first, and then clean?
+.IP
+# sport install numpy clean
 .TP
 .B rsync, --rsync, r, -r
 Synchronizes your local tree with your source tree, as defined in the
-sport script itself. By default sport is set to use the same paths
-that sbopkg institutes. If you are not using sbopkg then you may
-change this manually.
+sport script itself. This is no different than doing a manual
+rsync, it only offers the convenience of not having to type in the
+paths every time you want to sync. 
 .IP
-sport rsync
+# sport rsync
 .IP
 Pulls in any updates for your tree via rsync.
+.IP
+Because it does not make sense install something and then sync your
+source tree, rsync always runs first. If for some reason you want to
+install someting and then rsync, use the commands separately.
 
-.SH "CUSTOMIZING BUILD SCRIPTS"
-.TP
+.SH CUSTOMIZING BUILD SCRIPTS
+.PP
 Let's say you want to make some custom changes to a SlackBuild. For
 example, you might need to build GraphicsMagick without X11 support
 for a server without X libs installed.
-.TP
+.PP
 In this case, you would cd to your SlackBuilds directory, untar the
 GraphicsMagick tarball, modify the SlackBuild, and then run sport -i
 or sport -b. By default, sport does not clobber an existing unarchived
