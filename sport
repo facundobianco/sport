@@ -23,6 +23,7 @@ fi
 
 CWD=$(pwd)
 ABS="*"
+cleanmode=0
 
 #set -e
 
@@ -82,9 +83,27 @@ untar_pkg() {
 	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || \
 	    if [ "X$cleanmode" != "X2" ]; then
 	    echo "Errors were found; check the package name, and provide the category."
+	    echo $SBOPATH
+	    echo CATEGORY
+	    echo $PKG_NAME
 	    fi
 	exit
     fi
+}
+
+help() {
+    echo "sport [commands] <arguments>"
+    echo ""
+    echo "sport search foo bar  = searches your Slackbuilds tree for foo and bar"
+    echo "sport list audio      = lists all Slackbuilds in your $TREE/audio dir"
+    echo "sport cat foo         = displays the README and .info file for foo"
+    echo "sport install foo bar = installs foo and bar from your Slackbuild tree"
+    echo "sport check foo bar   = fuzzy searches /var/log/packages for foo and bar"
+    echo "sport queue foo.q     = process foo.q, where foo.q is a queue file"
+    echo "sport clean foo       = removes source code from $TREE/foo"
+    echo "sport rsync           = synchronizes your $TREE with your master branch"
+    echo "See man page for more information"
+    echo ""
 }
 
 cat_finder() {
@@ -111,10 +130,7 @@ cat_finder() {
 }
 
 local_finder() {
-	    if [ "X$item" != "X." ]; then
-		cat_finder "$item"
-		untar_pkg
-	    else
+	    if [ "X$item" == "X." ]; then
 		item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
 		SBOPATH=.
 		CATEGORY=.
@@ -157,6 +173,9 @@ elif [ "$1" = "build-only" -o "$1" = "build" -o "$1" = "--build-only" -o "$1" = 
 elif [ "$1" = "clean" -o "$1" = "--clean" -o "$1" = "-n" -o "$1" = "n" ]; then 
     cleanmode=1
     shift 1
+elif [ "$1" = "help" -o "$1" = "--help" -o "$1" = "-h" -o "$1" = "h" ]; then 
+    help
+    shift 1
 else
     break
 fi
@@ -166,11 +185,18 @@ done
 # SHOULD be a package name, so..
 # build an array of packages
 ARG=(${@})
+ARRAYSIZE=${#ARG[*]}
 
 ###### Main Loop
 n=0
 
+if [ "X$ARRAYSIZE" == "X0" ]; then
+    help
+    exit
+fi
+
 while [ True ]; do
+
     for item in ${ARG[@]}; do
 
 	CATEGORY=$(echo "$item" | cut -f1 -d"/")
@@ -257,12 +283,7 @@ while [ True ]; do
 	    cd $CWD
 	fi
 
-	ARRAYSIZE=${#ARG[*]}
-	if [ "X$ARRAYSIZE" == "X0" ]; then
-	    exit
-	fi
-
-if [ "$cleanmode" -ge "1" ]; then
+if [ "$cleanmode" -ge 1 ]; then
     cat_finder "$item"
     rm -r $SBOPATH/$CATEGORY/$PKG_NAME
     rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
