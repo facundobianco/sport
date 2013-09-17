@@ -1,5 +1,5 @@
 #!/bin/bash
-
+VERSION=${VERSION:-0.8}
 ## GPLv3
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -77,6 +77,19 @@ build_pkg() {
     ./$FILE.SlackBuild 2> /tmp/sport.log
 }
 
+version_return() {
+    echo "Checking for upgrade..."
+    UPGRADE=$(curl --connect-timeout 10 -s slackermedia.info/sport/index.html | grep VERSIONCHECK= | cut -f2 -d"=" )
+
+    if [ "X$VERSION" != "X$UPGRADE" ]; then
+	echo "An upgrade of Slackport is available."
+    else
+	echo "$VERSION is the most up-to-date version available."
+    fi
+
+    echo ""
+}
+
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
@@ -114,7 +127,7 @@ cat_finder() {
     done
 
     if [ $i -gt 1 ]
-    then echo""
+    then echo ""
     echo "More than one package matches your query."
     echo "Specify category and canonical pkg name."
     echo "Example: sport -c games/nethack"
@@ -130,13 +143,13 @@ cat_finder() {
 }
 
 local_finder() {
-	    if [ "X$item" == "X." ]; then
-		item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
-		SBOPATH=.
-		CATEGORY=.
-		PKG_NAME=${item}
-		echo "Working from current directory."
-	    fi
+    if [ "X$item" == "X." ]; then
+	item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
+	SBOPATH=.
+	CATEGORY=.
+	PKG_NAME=${item}
+	echo "Working from current directory."
+    fi
 }
 
 ### user interactions below
@@ -176,6 +189,10 @@ elif [ "$1" = "clean" -o "$1" = "--clean" -o "$1" = "-n" -o "$1" = "n" ]; then
 elif [ "$1" = "help" -o "$1" = "--help" -o "$1" = "-h" -o "$1" = "h" ]; then 
     help
     shift 1
+elif [ "$1" = "version" -o "$1" = "--version" -o "$1" = "-v" -o "$1" = "v" ]; then     
+    echo "Slackport version $VERSION"
+    version_return
+    shift 1
 else
     break
 fi
@@ -191,12 +208,11 @@ ARRAYSIZE=${#ARG[*]}
 n=0
 
 if [ "X$ARRAYSIZE" == "X0" ]; then
-    help
-    exit
+   help
+   exit
 fi
 
 while [ True ]; do
-
     for item in ${ARG[@]}; do
 
 	CATEGORY=$(echo "$item" | cut -f1 -d"/")
@@ -237,12 +253,15 @@ while [ True ]; do
 	
 	if [ "X$MODE" == "Xcatmode" ]; then
 	    local_finder
+	    echo "category" "$CATEGORY"
 	    echo " "
 	    echo "------------------------------------------"
+
 	    if [ "X$CATEGORY" == "X." ]; then
 		cat *{.info,README}
 	    else
-		cat $SBOPATH/$CATEGORY/*$PKG_NAME/*{.info,README}
+		cat_finder
+		cat $SBOPATH/$CATEGORY/\*$PKG_NAME/\*{.info,README}
 	    fi
 	    echo "------------------------------------------"
 	    echo " " 
@@ -283,16 +302,15 @@ while [ True ]; do
 	    cd $CWD
 	fi
 
-if [ "$cleanmode" -ge 1 ]; then
-    cat_finder "$item"
-    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
-    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
-    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	-C $SBOPATH/$CATEGORY/
-fi
+	if [ "$cleanmode" -ge 1 ]; then
+	    cat_finder "$item"
+	    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
+	    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
+	    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+		-C $SBOPATH/$CATEGORY/
+	fi
 
     done
-
-
+exit
 done
 
