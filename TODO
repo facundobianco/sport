@@ -2,13 +2,18 @@ sport -*- mode: org -*-
 
 This programme is not yet complete.
 
-* TODO parse flags with shift
+* DONE parse flags with shift
 
-* TODO parse multiple install arguments, ie sport i foo bar baz
+* DONE parse multiple install arguments, ie sport i foo bar baz
 
-* TODO make it possible to bump version number of install target
-
+* NOT-TODO make it possible to bump version number of install target
+ - ie, vlock version 0.8 is in slackbuilds. provide an option that
+   replaces '0.8' with '0.9'
+ - NO this is a stupid idea. Let the user open up emacs and change it
+   him or herself. This is not sport's job and it is
+   slack-deficient. also, it's too hard to implement.
+ 
 * TODO bug fix the queue file thing. not working 100%
 
 * TODO bug fix multiple install downloads in foo.info file
-
+ - ie, Handbrake's 52 codec downloads
