@@ -148,7 +148,7 @@ local_finder() {
 	item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
 	SBOPATH=.
 	CATEGORY=.
-	PKG_NAME=${item}
+	PKG_NAME="${item}"
     fi
 }
 
@@ -250,20 +250,20 @@ while [ True ]; do
 		ls $SBOPATH
             fi
 	fi
-	#foobar
-	if [ "X$MODE" == "Xcatmode" ]; then
-	    cat_finder "$item"
-	    echo "category" "$CATEGORY"
-	    echo " "
-	    echo "------------------------------------------"
 
+	if [ "X$MODE" == "Xcatmode" ]; then
+	    # are we working from CWD or not?
+	    local_finder "${item}"
+	    # well, are we?
 	    if [ "X$CATEGORY" == "X." ]; then
-#		local_finder "$item"
 		cat *{.info,README}
 	    else
-		echo $SBOPATH
-		echo $CATEGORY
-		echo $PKG_NAME
+		# if we are here
+		# then we are NOT working from CWD
+		# ergo, user thinks this is yum
+		cat_finder "$item"
+		echo "category" "$CATEGORY"
+		echo "------------------------------------------"
 		cat "${SBOPATH}/${CATEGORY}/${PKG_NAME}/"*{.info,README}
 	    fi
 	    echo "------------------------------------------"
