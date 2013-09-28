@@ -5,7 +5,7 @@
 @c %**end of header
 
 @copying
-Copyright (C) 2012 Klaatu
+Copyright (C) 2012-2013 Klaatu
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
 or any later version published by the Free Software Foundation;
@@ -54,14 +54,17 @@ after the BSD port system.
 
 @cindex about
 
-Slackware Port (sport) is a BSD Port, or Gentoo Emerge, style tool
+Slackware Port (sport) is a BSD Port-, or Gentoo Emerge-, style tool
 that helps you search through your collection of SlackBuilds, read
 relevant files about each SlackBuild, and execute the build and
 install processes.
 
 The most prolific and uniform collection of SlackBuilds being
 SlackBuilds.org, sport was mostly modeled after the structure of SB.o
-but technically it should work with any random collection of builds.
+but technically it should work, at least to some degree, with any
+random collection of builds. BSD Ports use Makefiles, but sport does
+not, mainly because it is designed to work first and foremost with
+SlackBuilds.org, which does not use Makefiles.
 
 Sport is not a package manager; this, we leave up to Slackware's built
 in toolset (ie, pkgtool). Sport is just a little tool to search,
@@ -78,10 +81,11 @@ installation just to make sure you did it right.
 
 @enumerate
 @item
-You should have an executable script called sport in /usr/sbin. It is in /usr/sbin
-because it belongs to system administration, which is the rightful
-domain of the root user and wheel group. You should also have the file /etc/sport.conf which is its sole
-configuration file
+After install, you should have an executable script called sport in
+/usr/sbin. It is in /usr/sbin because it belongs to system
+administration, which is the rightful domain of the root user and
+wheel group. You should also have the file /etc/sport.conf which is
+its sole configuration file.
 
 @enumerate
 @item 
@@ -97,6 +101,11 @@ to a reliable collection with an rsync of the SlackBuilds.org tree.
 $ su -c 'mkdir /usr/local/share/slackbuilds'
 $ su -c 'rsync -av rsync://slackbuilds.org/slackbuilds/14.0 /usr/local/share/slackbuilds'
 
+for convenience and out of BSD Port habit, I generally symlink my
+slackbuild tree to:
+
+$ su -c 'ln -s /usr/local/share/slackbuilds /usr/ports'
+
 @cindex repository
 @item 
 Before you can use sport, you must define the location of your
@@ -107,7 +116,7 @@ using both, you probably can skip this step.
 In a text editor, open the sport configuration file, /etc/sport.conf,
 and set the SBOPATH and MASTER variables. For instance:
 
-SBOPATH=/usr/slackbuilds
+SBOPATH=/usr/ports
 
 (Note the lack of a trailing slash.)
 
@@ -199,11 +208,18 @@ Obviously if the package you want to install has dependencies, you should resolv
 those dependencies before continuing. Unlike the BSD Ports systems, sport does
 NOT resolve dependencies for you.
 
+# cd /usr/ports/games/fortune_firefly
 # sport cat fortune_firefly
 
-If there were multiple matches for what you want to research, such as
-there are, for instance, w3m, then you must be more explicit by providing the path to the
-package from your SBOPATH.
+or just
+
+# sport cat .
+
+You can also use sport functions without cd'ing into their source
+directory, but in cases where there are multiple matches for what you
+want to research, such as there are with, for instance, w3m, then you must
+be more explicit by providing the path to the package from your
+SBOPATH.
 
 # sport cat games/fortune_firefly
 
@@ -213,7 +229,7 @@ or just
 
 if you're lazy.
 
-@item build|--build|-b|b
+@item build|build-only|--build-only|-b|b
 Downloads (if needed) and executes the SlackBuild for some package. It
 does not install the resulting package, leaving it instead in whatever
 directory the SlackBuild places it (default from SlackBuilds.org is
@@ -224,22 +240,18 @@ name of the package:
 
 # sport build fortune_firefly
 
+or if you are in the source folder:
+
+# sport build .
+
 If there are multiple potential matches for the package (as there
 would be for a package like w3m, which would match both emacs-w3m and
 w3m), then provide the category as well:
 
 # sport build games/fortune_firefly
 
-The build option is pretty flexible and can be given an INSTALLER
-variable, which allows you to control what happens after the code is
-compiled. The default is to do nothing; sport just builds and
-exits. However, you could use it to upgrade a package:
-
-INSTALLER=upgradepkg build network/w3m 
-
-Or even something more complex, like:
-
-INSTALLER="upgradepkg --install-new" sport b net*/w3m
+The build option is an additional flag to the --install option, so
+using it alone would be useless.
 
 @item install|--install|-i|i
 Downloads (if needed) and executes the SlackBuild for some package, and then runs
@@ -249,10 +261,24 @@ As with cat and build commands, you can provide the path from your
 current location if you are in your SlackBuilds tree; otherwise,
 provide the path from SBOPATH.
 
+The install option is pretty flexible. It can be limited to build only
+with the --build-only flag. 
+
+It can also be given an INSTALLER variable, which allows you to
+control what happens after the code is compiled. The default is to
+install; ergo, it uses installpkg to builds and then install. However,
+you could use it to upgrade a package:
+
+INSTALLER=upgradepkg sport install network/w3m 
+
+Or even something more complex, like:
+
+INSTALLER="upgradepkg --install-new" sport i net*/w3m
+
 @item clean|--clean|-n|n
 Removes the directory containing the source code and SlackBuild. It of
 course leaves any compressed copy of your SlackBuild directory (the
-SlackBuild.org structure).  If you are not using the SlackBuild.org
+SlackBuild.org structure). If you are not using the SlackBuild.org
 tree, then you should either keep your originals as compressed
 archives or do you should probably not use the clean command.
 
@@ -262,8 +288,18 @@ is already installed. This is a convenience command for when you are
 reading up on a package and want to quickly see if you already have a
 dependency installed.
 
+If you are currently in the source folder, you can, as usual, use the
+current directory as the argument:
+
+# sport check .
+
 @item rsync|--rsync|-r|r
 A quick and easy way to update your SlackBuilds tree.
+
+@item version|--version|-v|v
+Returns the Slackport version that you have installed, and then,
+providing that you have a connection to the internet, notifies you
+whether or not an upgrade is available.
 
 @end table
 
@@ -282,7 +318,10 @@ defined in the README of the SlackBuild):
 
 To pass make flags through sport, use MAKEOPTS:
 
-# MAKEOPTS='-j8' sport install multimedia/foo 
+# MAKEOPTS='-j8' sport install multimedia/foo
+
+MAKEOPTS, for what it is worth, can also be defined in the sport
+configuration file, located in /etc
 
 @node Queue
 @chapter Queue
@@ -321,12 +360,12 @@ then the application:
 # sport q w3m.tac
 
 By default, sport only builds the packages and does not install
-them. To make sport install or upgrade the packages after it builds
+them. To make sport install the packages after it builds:
 each one:
 
 # INSTALLER=installpkg sport queue w3m.list
 
-or 
+or, you could upgrade:
 
 # INSTALLER=upgradepkg sport queue w3m.list
 
@@ -367,18 +406,24 @@ Updating applications in Slackware is usually done with
 # upgradepkg /tmp/foo-0.2-noarch-1_SBo.tgz
 
 Updating via sport is no different. For example, if version 99 of
-sport has just been released, you would download it and use sport to build
+foo has just been released, you would download it and use sport to build
 it:
 
-# sport build foo
+# sport install --build-only foo
 
 And then use upgradepkg to install:
 
-# upgradepkg /tmp/foo*0.2*tgz 
+# upgradepkg /tmp/foo*99*tgz 
 
 Or as one command:
 
-# INSTALLER=upgradepkg sport build foo
+# INSTALLER=upgradepkg sport install foo
+
+Updating sport itself is no different. If a new version of sport is
+released, grab the update via git, and then use sport to build it:
+
+# cd sport.git
+# INSTALLER=upgradepkg sport install sport
 
 @node FAQs
 @chapter FAQs
@@ -395,21 +440,22 @@ Is sport a replacement for sbopkg?
 
 @enumerate A
 @item
-No, you will find that you will want to use sport on some days, and
-sbopkg on others, and sometimes neither! It just depends on what your
-workflow is at any given moment, or what the needs are for a
+Yes and No; you might find that you will want to use sport on some
+days, and sbopkg on others, and sometimes neither! It just depends on
+what your workflow is at any given moment, or what the needs are for a
 particular package you are installing.
 
-Sport works best when you're following a dependency trail of a
-particularly complex application. Not that sbopkg couldn't do the same
+It's mostly a matter of taste, but at this point the two basically
+achieve the same thing. That said, sbopkg can build queue files of
+dependencies for you, so you might appreciate that feature. And
+probably new features will arise that differeniate the two in the
+further in the future.
+
+For me, Sport works best when following a dependency trail of a
+particularly complex application. Not that sbopkg cannot do the same
 thing with its queue files, but if you like the feel of walking a
 directory tree and knocking out installs one-by-one, then sport is
 a good choice.
-
-You'll still use sbopkg for either pre-meditated install-o-ganzas (ie,
-setting up Slackermedia's 89,000 dependencies, give or take three
-zero's) or, conversely, when you're just idly browsing available
-packages because you feel the need to install something.
 @end enumerate
 @end enumerate
 

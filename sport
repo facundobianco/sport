@@ -1,5 +1,5 @@
 #!/bin/bash
-
+VERSION=${VERSION:-0.8}
 ## GPLv3
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,11 +21,9 @@ else
     MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
 fi
 
-CATEGORY=$(echo "$2" | cut -f1 -d"/")
-PKG_NAME=$(basename "$2" .tar.gz | cut -f2 -d"/")
-INSTALLER=${INSTALLER:-echo}
 CWD=$(pwd)
 ABS="*"
+cleanmode=0
 
 #set -e
 
@@ -35,6 +33,14 @@ if [ -z "$ARCH" ]; then
   x86_64) SUFFIX="_x86_64" ;;
        *) SUFFIX="" ;;
   esac
+fi
+
+## are we cleaning up after we are done?
+## this catches a straggler "clean" command after all args
+## i figure BSD'ers might do this by force of habit
+CLN=$(echo ${@} | rev | cut -f1 -d" ")
+if [ "$CLN" = "naelc" -o "$CLN" = "naelc--" -o "$CLN" = "n-" -o "$CLN" = "n" ]; then 
+    cleanmode=2
 fi
 
 build_pkg() {
@@ -71,141 +77,243 @@ build_pkg() {
     ./$FILE.SlackBuild 2> /tmp/sport.log
 }
 
+version_return() {
+    echo "Checking for upgrade..."
+    UPGRADE=$(curl --connect-timeout 10 -s slackermedia.info/sport/index.html | grep VERSIONCHECK= | cut -f2 -d"=" )
+
+    if [ "X$VERSION" != "X$UPGRADE" ]; then
+	echo "An upgrade of Slackport is available."
+    else
+	echo "$VERSION is the most up-to-date version available."
+    fi
+
+    echo ""
+}
+
 untar_pkg() {
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || echo \
-	    "Errors were found; check the package name, and provide the category." \
-	    && exit
+	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || \
+	    if [ "X$cleanmode" != "X2" ]; then
+	    echo "Errors were found; check the package name, and provide the category."
+	    echo $SBOPATH
+	    echo CATEGORY
+	    echo $PKG_NAME
+	    fi
+	exit
     fi
 }
 
+help() {
+    echo "sport [commands] <arguments>"
+    echo ""
+    echo "sport search foo bar  = searches your Slackbuilds tree for foo and bar"
+    echo "sport list audio      = lists all Slackbuilds in your $TREE/audio dir"
+    echo "sport cat foo         = displays the README and .info file for foo"
+    echo "sport install foo bar = installs foo and bar from your Slackbuild tree"
+    echo "sport check foo bar   = fuzzy searches /var/log/packages for foo and bar"
+    echo "sport queue foo.q     = process foo.q, where foo.q is a queue file"
+    echo "sport clean foo       = removes source code from $TREE/foo"
+    echo "sport rsync           = synchronizes your $TREE with your master branch"
+    echo "See man page for more information"
+    echo ""
+}
+
 cat_finder() {
-    local CHECK=${1}
     i=0
-    for COUNT in $(find $SBOPATH -iname "$ABS""$CHECK".tar.gz )
+    for COUNT in $(find $SBOPATH -iname "$ABS""$item".tar.gz )
     do let i++
 	echo $COUNT
     done
 
     if [ $i -gt 1 ]
-    then echo""
+    then echo ""
     echo "More than one package matches your query."
     echo "Specify category and canonical pkg name."
     echo "Example: sport -c games/nethack"
     exit
+
     else
-	SLASH=$(echo $CHECK | grep "/")
-	if [ -n "$SLASH" ]
-	then CATEGORY=$(echo $CHECK | cut -f1 -d"/")
+	SLASH=$(echo $item | grep "/")
+	if [ -n "$SLASH" ]; then
+	    CATEGORY=$(echo $item | cut -f1 -d"/")
 	else
-	    CATEGORY=$(find $SBOPATH -iname "$ABS""$CHECK".tar.gz | rev | cut -f2 -d"/" | rev )
+	    CATEGORY=$(find $SBOPATH -iname "${ABS}""${item}".tar.gz | rev | cut -f2 -d"/" | rev )
 	fi
     fi
 }
 
+local_finder() {
+    if [ "X$item" == "X." ]; then
+	item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
+	SBOPATH=.
+	CATEGORY=.
+	PKG_NAME=${item}
+    fi
+}
+
 ### user interactions below
+while [ True ]; do
+if [ "$1" = "search" -o "$1" = "--search" -o "$1" = "-s" -o "$1" = "s" ]; then 
+    MODE=searchmode
+    shift 1
+elif [ "$1" = "check" -o "$1" = "--check" -o "$1" = "-k" -o "$1" = "k" ]; then 
+    MODE=checkmode
+    shift 1
+elif [ "$1" = "list" -o "$1" = "--list" -o "$1" = "-l" -o "$1" = "l" -o "$1" = "ls" ]; then 
+    MODE=listmode
+    shift 1
+elif [ "$1" = "cat" -o "$1" = "--cat" -o "$1" = "-c" -o "$1" = "c" ]; then 
+    MODE=catmode
+    shift 1
+elif [ "$1" = "queue" -o "$1" = "--queue" -o "$1" = "-q" -o "$1" = "q" ]; then 
+    MODE=queuemode
+    INSTALLER=${INSTALLER:-echo}
+    shift 1
+elif [ "$1" = "install" -o "$1" = "--install" -o "$1" = "-i" -o "$1" = "i" ]; then 
+    MODE=installmode
+    INSTALLER=${INSTALLER:-installpkg}
+    shift 1
+elif [ "$1" = "rsync" -o "$1" = "--rsync" -o "$1" = "-r" -o "$1" = "r" ]; then 
+    rsyncmode=1
+    test -d $SBOPATH || mkdir -p $SBOPATH
+    rsync -av $MASTER $SBOPATH
+    shift 1
+elif [ "$1" = "build-only" -o "$1" = "build" -o "$1" = "--build-only" -o "$1" = "-b" -o "$1" = "b" ]; then
+    buildmode=1
+    INSTALLER=${INSTALLER:-echo}
+    shift 1
+elif [ "$1" = "clean" -o "$1" = "--clean" -o "$1" = "-n" -o "$1" = "n" ]; then 
+    cleanmode=1
+    shift 1
+elif [ "$1" = "help" -o "$1" = "--help" -o "$1" = "-h" -o "$1" = "h" ]; then 
+    help
+    shift 1
+elif [ "$1" = "version" -o "$1" = "--version" -o "$1" = "-v" -o "$1" = "v" ]; then     
+    echo "Slackport version $VERSION"
+    version_return
+    shift 1
+else
+    break
+fi
+done
 
-case "$1" in
-    search|--search|s|-s)
-	cd $SBOPATH
-        QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
-	for RESULT in $(find $SBOPATH -iname *${QUERY}*.tar.* \
-	    | grep -v asc$ | rev | cut -f1,2 -d"/" | rev);
-	    do echo -e "$RESULT%"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | \
-		grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
-	cd $CWD
-	;;
+# everything else left at this point
+# SHOULD be a package name, so..
+# build an array of packages
+ARG=(${@})
+ARRAYSIZE=${#ARG[*]}
 
-    check|--check|k|-k)
-        CHECKER=$(echo "$2" | rev | cut -f1 -d"/" | rev)
-        find /var/log/packages/ -iname *"${CHECKER}"*
-	;;
+###### Main Loop
+n=0
 
-    rsync|--rsync|r|-r)
-	test -d $SBOPATH || mkdir -p $SBOPATH
-	rsync -av $MASTER $SBOPATH
-	exit
-	;;
+if [ "X$ARRAYSIZE" == "X0" ]; then
+   help
+   exit
+fi
 
-    list|--list|l|ls|-l)
-        if [ X"$2" != "X" ]
-        then
-        QUERY=$(echo "$2" | rev | cut -f1 -d"/" | rev)
-        for RESULT in $(ls $SBOPATH/$QUERY | grep tar.gz | grep -v asc$ );
-        do echo -e "$RESULT%"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | \
-	    grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
-        else
-            ls $SBOPATH
-        fi
-        ;;
+while [ True ]; do
+    for item in ${ARG[@]}; do
 
-# everything below needs to inherit CATEGORY
-    cat|--cat|c|-c)
-	cat_finder "$2"
-	#untar_pkg
-	echo " "
-	echo "------------------------------------------"
-	cat $SBOPATH/$CATEGORY/*$PKG_NAME/*{.info,README}
-	echo "------------------------------------------"
-	echo " " 
-	;;
+	CATEGORY=$(echo "$item" | cut -f1 -d"/")
+	PKG_NAME=$(basename "$item" .tar.gz | cut -f2 -d"/")
 
-    build|--build|b|-b)
-	cat_finder "$2"
-	untar_pkg
-	cd $SBOPATH/$CATEGORY/$PKG_NAME
-	build_pkg $PKG_NAME
-	$INSTALLER /tmp/$PKG_NAME*SBo*t?z
-	cd $CWD
-	;;
+	unset ARG[${n}]
+	let n++
 
-    queue|--queue|q|-q)
-	echo $(date) > /tmp/sport.queue.log 
-
-	#echo "Install packages after building? [y/N]"
-	#read CONTINUE
-	#if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
-	#then FINISHER="echo"
-	#else
-	#    FINISHER="installpkg"
-	#fi
-
-	for ITEM in $(< $2)
-	do
-	    PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
-	    ABS=""
-	    cat_finder "$ITEM"
-	    cd $SBOPATH/$CATEGORY/$PKG_NAME
-	    build_pkg $PKG_NAME
-	    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
-	    echo $PKG_NAME >> /tmp/sport.queue.log
+	if [ "X$MODE" == "Xsearchmode" ]; then
+	    cd $SBOPATH
+            QUERY=$(echo "$item" | rev | cut -f1 -d"/" | rev)
+	    # this separates searches when multiple searches are performed
+	    # you can remove it if it bugs you
+	    echo "---------------$QUERY---------------------------"
+	    for RESULT in $(find $SBOPATH -iname "*${QUERY}*.tar.*" | grep -v asc$ | rev | cut -f1,2 -d"/" | rev); do
+		echo -e "$RESULT%"$(tar -xf $SBOPATH/$RESULT -O 2>/dev/null | \
+		    grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
 	    cd $CWD
-	done
-	;;
+	fi
 
-    install|--install|i|-i)
-	cat_finder "$2"
-	untar_pkg
-	cd $SBOPATH/$CATEGORY/$PKG_NAME
-	build_pkg $PKG_NAME
-	installpkg /tmp/$PKG_NAME*SBo*t?z
-	cd $CWD
-	;;
+	if [ "X$MODE" == "Xcheckmode" ]; then
+	    local_finder
+	    CHECKER=$(echo "$item" | rev | cut -f1 -d"/" | rev)
+            find /var/log/packages/ -iname "*${CHECKER}*"
+	fi
+    
+	if [ "X$MODE" == "Xlistmode" ]; then
+	    if [ X"$item" != "X" ]
+            then
+		QUERY=$(echo "$item" | rev | cut -f1 -d"/" | rev)
+		for RESULT in $(ls $SBOPATH/$QUERY | grep tar.gz | grep -v asc$ );
+		do echo -e "$RESULT%"$(tar -xf $SBOPATH/$QUERY/$RESULT -O 2>/dev/null | \
+		    grep handy-ruler -A1 | cut -f2 -d":" | tail -n1) ; done | column -s% -t
+            else
+		ls $SBOPATH
+            fi
+	fi
+	#foobar
+	if [ "X$MODE" == "Xcatmode" ]; then
+	    cat_finder "$item"
+	    echo "category" "$CATEGORY"
+	    echo " "
+	    echo "------------------------------------------"
 
-    clean|--clean|n|-n)
-	cat_finder "$2"
-	rm -r $SBOPATH/$CATEGORY/$PKG_NAME
-	rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
-	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
-	    -C $SBOPATH/$CATEGORY/
-	;;
+	    if [ "X$CATEGORY" == "X." ]; then
+#		local_finder "$item"
+		cat *{.info,README}
+	    else
+		echo $SBOPATH
+		echo $CATEGORY
+		echo $PKG_NAME
+		cat "${SBOPATH}/${CATEGORY}/${PKG_NAME}/"*{.info,README}
+	    fi
+	    echo "------------------------------------------"
+	    echo " " 
+	fi
+	
+	if [ "X$MODE" == "Xqueuemode" ]; then
+	    echo $(date) > /tmp/sport.queue.log 
 
-    *)
-    	echo " "
-        echo "sport needs a subcommand and a package name:"
-	echo "sport search|cat|build|install|check|rsync|clean PACKAGE"
-	echo "try 'man sport' or 'info sport' for more"
-	echo " "
-        exit	
-esac
+	    for ITEM in $(< $item)
+	    do
+		PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
+		ABS=""
+		cat_finder "$ITEM"
+		cd $SBOPATH/$CATEGORY/$PKG_NAME
+		build_pkg $PKG_NAME
+		if [ "X$buildmode" != "X1" ]; then
+		    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
+		fi
+		echo $PKG_NAME >> /tmp/sport.queue.log
+		cd $CWD
+	    done
+	fi
+
+	if [ "X$MODE" == "Xinstallmode" ]; then
+	    local_finder
+
+	    START=$(find . -iname $item.SlackBuild)
+	    if [ "X$START" == "X" ]; then
+		cd $SBOPATH/$CATEGORY/$PKG_NAME
+	    else
+		echo "Working in current directory"
+	    fi
+
+	    build_pkg $PKG_NAME
+	    if [ "X$buildmode" != "X1" ]; then
+		$INSTALLER /tmp/$PKG_NAME*SBo*t?z
+	    fi
+	    cd $CWD
+	fi
+
+	if [ "$cleanmode" -ge 1 ]; then
+	    cat_finder "$item"
+	    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
+	    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
+	    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+		-C $SBOPATH/$CATEGORY/
+	fi
+
+    done
+exit
+done
+
