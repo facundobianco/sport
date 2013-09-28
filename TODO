@@ -12,7 +12,10 @@ This programme is not yet complete.
  - NO this is a stupid idea. Let the user open up emacs and change it
    him or herself. This is not sport's job and it is
    slack-deficient. also, it's too hard to implement.
- 
+ - actually it's easy to implement but still stupid for sport. just
+   set VERSION to whatever number you prefer and that mostly does
+   it. change link of download and you're done
+   
 * TODO bug fix the queue file thing. not working 100%
 
 * TODO bug fix multiple install downloads in foo.info file
