@@ -132,12 +132,13 @@ cat_finder() {
     echo "Specify category and canonical pkg name."
     echo "Example: sport -c games/nethack"
     exit
+
     else
 	SLASH=$(echo $item | grep "/")
-	if [ -n "$SLASH" ]
-	then CATEGORY=$(echo $item | cut -f1 -d"/")
+	if [ -n "$SLASH" ]; then
+	    CATEGORY=$(echo $item | cut -f1 -d"/")
 	else
-	    CATEGORY=$(find $SBOPATH -iname "$ABS""$item".tar.gz | rev | cut -f2 -d"/" | rev )
+	    CATEGORY=$(find $SBOPATH -iname "${ABS}""${item}".tar.gz | rev | cut -f2 -d"/" | rev )
 	fi
     fi
 }
@@ -148,7 +149,6 @@ local_finder() {
 	SBOPATH=.
 	CATEGORY=.
 	PKG_NAME=${item}
-	echo "Working from current directory."
     fi
 }
 
@@ -252,18 +252,19 @@ while [ True ]; do
 	fi
 	#foobar
 	if [ "X$MODE" == "Xcatmode" ]; then
-	    local_finder "$item"
-	    cat_finder
+	    cat_finder "$item"
 	    echo "category" "$CATEGORY"
 	    echo " "
 	    echo "------------------------------------------"
 
 	    if [ "X$CATEGORY" == "X." ]; then
-		local_finder
+#		local_finder "$item"
 		cat *{.info,README}
 	    else
-		cat_finder
-		cat $SBOPATH/$CATEGORY/\*$PKG_NAME/\*{.info,README}
+		echo $SBOPATH
+		echo $CATEGORY
+		echo $PKG_NAME
+		cat "${SBOPATH}/${CATEGORY}/${PKG_NAME}/"*{.info,README}
 	    fi
 	    echo "------------------------------------------"
 	    echo " " 
