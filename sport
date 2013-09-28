@@ -278,9 +278,14 @@ while [ True ]; do
 		PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
 		ABS=""
 		cat_finder "$ITEM"
+
 		cd $SBOPATH/$CATEGORY/$PKG_NAME
+		# builds the package
 		build_pkg $PKG_NAME
+
 		if [ "X$buildmode" != "X1" ]; then
+		    # if we are here
+		    # then we do NOT != wnat to only build, ergo
 		    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
 		fi
 		echo $PKG_NAME >> /tmp/sport.queue.log
