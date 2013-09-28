@@ -250,14 +250,16 @@ while [ True ]; do
 		ls $SBOPATH
             fi
 	fi
-	
+	#foobar
 	if [ "X$MODE" == "Xcatmode" ]; then
-	    local_finder
+	    local_finder "$item"
+	    cat_finder
 	    echo "category" "$CATEGORY"
 	    echo " "
 	    echo "------------------------------------------"
 
 	    if [ "X$CATEGORY" == "X." ]; then
+		local_finder
 		cat *{.info,README}
 	    else
 		cat_finder
