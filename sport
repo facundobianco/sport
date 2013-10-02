@@ -295,7 +295,7 @@ while [ True ]; do
 
 	if [ "X$MODE" == "Xinstallmode" ]; then
 	    local_finder
-
+	    cat_finder
 	    START=$(find . -iname $item.SlackBuild)
 	    if [ "X$START" == "X" ]; then
 		cd $SBOPATH/$CATEGORY/$PKG_NAME
