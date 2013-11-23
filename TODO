@@ -18,5 +18,5 @@ This programme is not yet complete.
    
 * TODO bug fix the queue file thing. not working 100%
 
-* TODO bug fix multiple install downloads in foo.info file
+* DONE bug fix multiple install downloads in foo.info file
  - ie, Handbrake's 52 codec downloads

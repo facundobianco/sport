@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=${VERSION:-0.8.1}
+VERSION=${VERSION:-0.8.2}
 ## GPLv3
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@ VERSION=${VERSION:-0.8.1}
 if [ -e /etc/sport.conf ]
 then source /etc/sport.conf
 else
-    SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.0}
-    MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.0/"}
+    SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.1}
+    MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.1/"}
 fi
 
 CWD=$(pwd)
@@ -45,33 +45,48 @@ fi
 
 build_pkg() {
     local FILE=${1##*/}
+    # what arch do we need?
+    # if we are x64 but x64 field is empty..
     if [ X$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= \
 	| cut -f2 -d\") == "X" -a X$SUFFIX == "X_x86_64" ]
+    # then pretend we are 32
     then 
-	ULINK=$(cat $FILE.info | grep DOWNLOAD= | cut -f2 -d\" )
-	MD5CHECK=$(cat $FILE.info | grep MD5SUM= | cut -f2 -d\" )
-    else
-	ULINK=$(cat $FILE.info | grep DOWNLOAD"$SUFFIX"= | cut -f2 -d\" )
-	MD5CHECK=$(cat $FILE.info | grep MD5SUM"$SUFFIX"= | cut -f2 -d\" )
+	local SUFFIX=""
     fi
+
+    # create an array for downloadable files and md5sums
+    ULINK=(`sed -n '/DOWNLOAD'$SUFFIX'/,/MD5SUM'$SUFFIX'/ s_tp://_&_1p' $FILE.info | tr -d "\\ "`)
+    MD5CHECK=($(sed -n '/MD5SUM'$SUFFIX'/,/DOWNLOAD'$SUFFIX'_/ s_[0-9][a-z]._&_1p' $FILE.info | cut -f2 -d= | tr -d '\\ "' ))
+
+    # echo "DEBUG" ${ULINK[@]}
 
     # download the sauce
-    wget --no-clobber $ULINK
-    local TARBALL=$(echo "$ULINK" | rev | cut -f1 -d"/" | rev )
-    local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
+    for item in ${ULINK[@]}; do
+	wget --no-clobber $(echo $item | cut -f2 -d'=' | tr -d '"' | tr -d '\\');
+    done
 
-    if [ "$MD5CHECK" != "$MD5SUM" ]
-    then 
-	echo "Expected sum " $MD5CHECK
-	echo "What we got: " $MD5SUM
-	echo "O.o md5sums do not match. Continue? [Y/n]"
-	read CONTINUE
-	if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
-	then exit
-	else
-	    echo "Boldly continuing with build..."
-	fi
-    fi
+    # all sources have been wgotten
+    # now check md5sums
+    local COUNT=0
+    for item in ${MD5CHECK[@]}; do
+	local TARBALL=$(basename ${ULINK[$COUNT]} | tr -d '\\ "' )
+	local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
+	let COUNT++
+
+	if [ "$item" != "$MD5SUM" ]
+	then 
+	    echo $TARBALL
+	    echo "Expected sum " $item
+	    echo "What we got: " $MD5SUM
+	    echo "O.o md5sums do not match. Continue? [Y/n]"
+	    read CONTINUE
+	    if [ X$(echo $CONTINUE | tr [:upper:] [:lower:] | cut -b1) != "Xy" ]
+	    then exit
+	    else
+		echo "Boldly continuing with build..."
+	    fi
+	fi;
+    done
 
     chmod +x ./$FILE.SlackBuild
     ./$FILE.SlackBuild 2> /tmp/sport.log
@@ -299,11 +314,10 @@ while [ True ]; do
 	if [ "X$MODE" == "Xinstallmode" ]; then
 	    local_finder
 	    cat_finder
-	    START=$(find -maxdepth 0 . -iname $item.SlackBuild)
+	    START=$(find . -iname "${item}.SlackBuild" -maxdepth 0)
 	    if [ "X$START" == "X" ]; then
 		cd $SBOPATH/$CATEGORY/$PKG_NAME
 	    else
-		echo "DEBUG $START"
 		echo "Working in current directory"
 	    fi
 
