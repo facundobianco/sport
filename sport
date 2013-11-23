@@ -55,7 +55,7 @@ build_pkg() {
     fi
 
     # create an array for downloadable files and md5sums
-    ULINK=(`sed -n '/DOWNLOAD'$SUFFIX'/,/MD5SUM'$SUFFIX'/ s_tp://_&_1p' $FILE.info | tr -d "\\ "`)
+    ULINK=(`sed -n '/DOWNLOAD'$SUFFIX'/,/MD5SUM'$SUFFIX'/ s_tp.*//_&_1p' $FILE.info | tr -d "\\ "`)
     MD5CHECK=($(sed -n '/MD5SUM'$SUFFIX'/,/DOWNLOAD'$SUFFIX'_/ s_[0-9][a-z]._&_1p' $FILE.info | cut -f2 -d= | tr -d '\\ "' ))
 
     # echo "DEBUG" ${ULINK[@]}
