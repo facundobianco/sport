@@ -127,20 +127,23 @@ cat_finder() {
     done
 
     if [ $i -gt 1 ]
-    then echo ""
-    echo "More than one package matches your query."
-    echo "Specify category and canonical pkg name."
-    echo "Example: sport -c games/nethack"
-    exit
 
+    then echo ""
+
+    # did we get an absolute path?
+    SLASH=$(echo $item | grep "/")
+
+    if [ -n "$SLASH" ]; then
+	CATEGORY=$(echo $item | cut -f1 -d"/")
     else
-	SLASH=$(echo $item | grep "/")
-	if [ -n "$SLASH" ]; then
-	    CATEGORY=$(echo $item | cut -f1 -d"/")
-	else
-	    CATEGORY=$(find $SBOPATH -iname "${ABS}""${item}".tar.gz | rev | cut -f2 -d"/" | rev )
-	fi
+	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
     fi
+
+    # if there is only one possible match
+    # then let's just go with it
+    else
+	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
+fi
 }
 
 local_finder() {
@@ -262,7 +265,7 @@ while [ True ]; do
 		# then we are NOT working from CWD
 		# ergo, user thinks this is yum
 		cat_finder "$item"
-		echo "category" "$CATEGORY"
+#		echo "category" "$CATEGORY"
 		echo "------------------------------------------"
 		cat "${SBOPATH}/${CATEGORY}/${PKG_NAME}/"*{.info,README}
 	    fi
