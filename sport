@@ -69,6 +69,8 @@ build_pkg() {
     # now check md5sums
     local COUNT=0
     for item in ${MD5CHECK[@]}; do
+
+
 	local TARBALL=$(basename ${ULINK[$COUNT]} | tr -d '\\ "' )
 	local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
 	let COUNT++
@@ -166,7 +168,7 @@ local_finder() {
 	item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
 	SBOPATH=.
 	CATEGORY=.
-	PKG_NAME="${item}"
+	PKG_NAME=$(basename "${item}" .tar.gz)
     fi
 }
 
@@ -234,7 +236,7 @@ while [ True ]; do
     for item in ${ARG[@]}; do
 
 	CATEGORY=$(echo "$item" | cut -f1 -d"/")
-	PKG_NAME=$(basename "$item" .tar.gz | cut -f2 -d"/")
+	PKG_NAME=$(basename "$item".tar.gz | cut -f2 -d"/")
 
 	unset ARG[${n}]
 	let n++
@@ -282,7 +284,7 @@ while [ True ]; do
 		cat_finder "$item"
 #		echo "category" "$CATEGORY"
 		echo "------------------------------------------"
-		cat "${SBOPATH}/${CATEGORY}/${PKG_NAME}/"*{.info,README}
+		cat "${SBOPATH}/${CATEGORY}/$(basename ${PKG_NAME} .tar.gz)/"*{.info,README}
 	    fi
 	    echo "------------------------------------------"
 	    echo " " 
@@ -293,13 +295,13 @@ while [ True ]; do
 
 	    for ITEM in $(< $item)
 	    do
-		PKG_NAME=$(echo $ITEM | rev | cut -f1 -d"/" | rev)
+		PKG_NAME=$(echo $(basename $ITEM .tar.gz) | rev | cut -f1 -d"/" | rev)
 		ABS=""
 		cat_finder "$ITEM"
-
+		echo "pkgname" $PKG_NAME
 		cd $SBOPATH/$CATEGORY/$PKG_NAME
 		# builds the package
-		build_pkg $PKG_NAME
+		build_pkg $(basename $PKG_NAME .tar.gz)
 
 		if [ "X$buildmode" != "X1" ]; then
 		    # if we are here
@@ -316,12 +318,12 @@ while [ True ]; do
 	    cat_finder
 	    START=$(find . -iname "${item}.SlackBuild" -maxdepth 0)
 	    if [ "X$START" == "X" ]; then
-		cd $SBOPATH/$CATEGORY/$PKG_NAME
+		cd $SBOPATH/$CATEGORY/$(basename $PKG_NAME .tar.gz)
 	    else
 		echo "Working in current directory"
 	    fi
 
-	    build_pkg $PKG_NAME
+	    build_pkg $(basename $PKG_NAME .tar.gz)
 	    if [ "X$buildmode" != "X1" ]; then
 		$INSTALLER /tmp/$PKG_NAME*SBo*t?z
 	    fi
