@@ -325,7 +325,7 @@ while [ True ]; do
 
 	    build_pkg $(basename $PKG_NAME .tar.gz)
 	    if [ "X$buildmode" != "X1" ]; then
-		$INSTALLER /tmp/$PKG_NAME*SBo*t?z
+		$INSTALLER /tmp/$(basename $PKG_NAME .tar.gz)*t?z
 	    fi
 	    cd $CWD
 	fi
