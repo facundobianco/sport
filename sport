@@ -75,6 +75,10 @@ build_pkg() {
 	local MD5SUM=$(md5sum $TARBALL | cut -f1 -d" ")
 	let COUNT++
 
+	if [ $TARBALL ] ; then
+	    break
+	fi
+
 	if [ "$item" != "$MD5SUM" ]
 	then 
 	    echo $TARBALL
