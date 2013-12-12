@@ -326,15 +326,15 @@ configuration file, located in /etc
 @node Queue
 @chapter Queue
 
-Sport supports queue, or batch, files. 
+Sport (by way of BASH) inherently supports queue, or batch, files. 
 
 Creating a queue file is easy. Just echo the package names into a
 plain text file, newline delimited, in the order you wish for them to
 be installed. 
 
-It is can use both the category and package name or just the package
+You can use both the category and package name or just the package
 name; queue processing is strictly non-fuzzy, so the category is not
-entirely necessary.
+usually necessary..
 
 Here is an example of a simple queue file for w3m:
 
@@ -345,7 +345,7 @@ network/w3m
 Save these three lines as w3m.list (or any filename) and then have
 sport process it:
 
-# sport queue w3m.list
+# sport install $(<w3m.list)
 
 Often you'll build a queue file from top down, meaning you'll start
 with the application you want to install, and then list the
@@ -357,17 +357,17 @@ $ tac w3m.list > w3m.tac
 And then process it so that it  builds the dependencies first, and
 then the application:
 
-# sport q w3m.tac
+# sport i $(<w3m.tac)
 
-By default, sport only builds the packages and does not install
-them. To make sport install the packages after it builds:
-each one:
+By default, sport builds and installs the packages in a queue file. To
+make sport only build, use the --build-only flag:
 
-# INSTALLER=installpkg sport queue w3m.list
+# sport install --build-only $(<w3m.list)
 
-or, you could upgrade:
+Of course all other sport conventions apply; you can modify whether
+you are installing or upgrading:
 
-# INSTALLER=upgradepkg sport queue w3m.list
+# INSTALLER=upgradepkg sport i $(<w3m.list)
 
 In fact, you could even keep local stashes of SlackBuilds associated
 with an important application, and use sport to upgrade the
@@ -377,7 +377,7 @@ and all of the codecs it needs (xvid, theora, webm, openamr,
 schroedinger, and so on) in an ``ffmpeg'' directory in your home
 directory, and pass both SBOPATH and INSTALLER variables:
 
-# SBOPATH=$(pwd) INSTALLER=upgradepkg sport q ffmpeg.list
+# SBOPATH=$(pwd) INSTALLER=upgradepkg sport i $(<ffmpeg.list)
 
 @node Customizing
 @chapter Customizing
@@ -451,11 +451,6 @@ dependencies for you, so you might appreciate that feature. And
 probably new features will arise that differeniate the two in the
 further in the future.
 
-For me, Sport works best when following a dependency trail of a
-particularly complex application. Not that sbopkg cannot do the same
-thing with its queue files, but if you like the feel of walking a
-directory tree and knocking out installs one-by-one, then sport is
-a good choice.
 @end enumerate
 @end enumerate
 

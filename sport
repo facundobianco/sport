@@ -141,30 +141,29 @@ help() {
 }
 
 cat_finder() {
-    i=0
-    for COUNT in $(find $SBOPATH -iname "$ABS""$item".tar.gz )
-    do let i++
-	echo $COUNT
-    done
-
-    if [ $i -gt 1 ]
-
-    then echo ""
-
     # did we get an absolute path?
     SLASH=$(echo $item | grep "/")
 
     if [ -n "$SLASH" ]; then
+	# yes we got an absolute path. parse it.
 	CATEGORY=$(echo $item | cut -f1 -d"/")
+	item=$(echo $item | cut -f2 -d"/")
+	CATEGORY=$(realpath "${SBOPATH}"/$CATEGORY/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
+	if [ -z $CATEGORY ]; then
+	    echo "Error: File not found. Try a search first."
+	    sport s $item
+	    exit
+	fi
     else
+	# no we need to find the absolute path.
 	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
+	if [ -z $CATEGORY ]; then
+	    echo "Error: File not found. Try a search first."
+	    sport s $item
+	    exit
+	fi
     fi
 
-    # if there is only one possible match
-    # then let's just go with it
-    else
-	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
-fi
 }
 
 local_finder() {
