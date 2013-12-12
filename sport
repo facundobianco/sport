@@ -44,6 +44,9 @@ if [ "$CLN" = "naelc" -o "$CLN" = "naelc--" -o "$CLN" = "n-" -o "$CLN" = "n" ]; 
 fi
 
 build_pkg() {
+    # this function gets and md5checks the source(s)
+    # and then executes the .SlackBuild script
+
     local FILE=${1##*/}
     # what arch do we need?
     # if we are x64 but x64 field is empty..
@@ -99,6 +102,9 @@ build_pkg() {
 }
 
 version_return() {
+    ## this function pings the website to check current version
+    ## and alerts the user if an upgrade is available
+
     echo "Checking for upgrade..."
     UPGRADE=$(curl --connect-timeout 10 -s slackermedia.info/sport/index.html | grep VERSIONCHECK= | cut -f2 -d"=" )
 
@@ -112,6 +118,9 @@ version_return() {
 }
 
 untar_pkg() {
+    ## this function untars the SlackBuild archive as needed
+    ## because SBo SlackBuilds are individually gzipped
+
     if [ ! -d $SBOPATH/$CATEGORY/$PKG_NAME ] ; then
 	tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
 	    -C $SBOPATH/$CATEGORY/ 2> /dev/null || \
@@ -126,6 +135,9 @@ untar_pkg() {
 }
 
 help() {
+    ## this function provides help if the user clearly does
+    ## not know how to use the application
+
     echo "sport [commands] <arguments>"
     echo ""
     echo "sport search foo bar  = searches your Slackbuilds tree for foo and bar"
@@ -141,6 +153,9 @@ help() {
 }
 
 cat_finder() {
+    ## this function determines the path to whatever ARG
+    ## the user has provided
+
     # did we get an absolute path?
     SLASH=$(echo $item | grep "/")
 
@@ -167,11 +182,17 @@ cat_finder() {
 }
 
 local_finder() {
+    ## this function determines if the user is actually
+    ## wanting to work from the CWD
+
     if [ "X$item" == "X." ]; then
 	item=$(/bin/ls *.SlackBuild | cut -f1 -d'.')
 	SBOPATH=.
 	CATEGORY=.
 	PKG_NAME=$(basename "${item}" .tar.gz)
+    else
+	# we are not wanting to work from CWD
+	return 1
     fi
 }
 
@@ -300,8 +321,7 @@ while [ True ]; do
 	fi
 
 	if [ "X$MODE" == "Xinstallmode" ]; then
-	    local_finder
-	    cat_finder
+	    local_finder || cat_finder
 	    START=$(find . -iname "${item}.SlackBuild" -maxdepth 0)
 	    if [ "X$START" == "X" ]; then
 		cd $SBOPATH/$CATEGORY/$(basename $PKG_NAME .tar.gz)
