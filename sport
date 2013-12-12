@@ -133,7 +133,7 @@ help() {
     echo "sport cat foo         = displays the README and .info file for foo"
     echo "sport install foo bar = installs foo and bar from your Slackbuild tree"
     echo "sport check foo bar   = fuzzy searches /var/log/packages for foo and bar"
-    echo "sport queue foo.q     = process foo.q, where foo.q is a queue file"
+    echo "sport queue foo.q     = deprecated! use sport i \$(<foo.q) instead."
     echo "sport clean foo       = removes source code from $TREE/foo"
     echo "sport rsync           = synchronizes your $TREE with your master branch"
     echo "See man page for more information"
@@ -190,7 +190,7 @@ elif [ "$1" = "cat" -o "$1" = "--cat" -o "$1" = "-c" -o "$1" = "c" ]; then
     MODE=catmode
     shift 1
 elif [ "$1" = "queue" -o "$1" = "--queue" -o "$1" = "-q" -o "$1" = "q" ]; then 
-    MODE=queuemode
+    MODE=installmode
     INSTALLER=${INSTALLER:-echo}
     shift 1
 elif [ "$1" = "install" -o "$1" = "--install" -o "$1" = "-i" -o "$1" = "i" ]; then 
@@ -291,29 +291,6 @@ while [ True ]; do
 	    fi
 	    echo "------------------------------------------"
 	    echo " " 
-	fi
-	
-	if [ "X$MODE" == "Xqueuemode" ]; then
-	    echo $(date) > /tmp/sport.queue.log 
-
-	    for ITEM in $(< $item)
-	    do
-		PKG_NAME=$(echo $(basename $ITEM .tar.gz) | rev | cut -f1 -d"/" | rev)
-		ABS=""
-		cat_finder "$ITEM"
-		echo "pkgname" $PKG_NAME
-		cd $SBOPATH/$CATEGORY/$PKG_NAME
-		# builds the package
-		build_pkg $(basename $PKG_NAME .tar.gz)
-
-		if [ "X$buildmode" != "X1" ]; then
-		    # if we are here
-		    # then we do NOT != wnat to only build, ergo
-		    $INSTALLER /tmp/$PKG_NAME*SBo*t?z
-		fi
-		echo $PKG_NAME >> /tmp/sport.queue.log
-		cd $CWD
-	    done
 	fi
 
 	if [ "X$MODE" == "Xinstallmode" ]; then

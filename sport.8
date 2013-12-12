@@ -80,7 +80,7 @@ Assuming the package name is unique:
 .IP
 # sport cat ophcrack 
 .IP
-If there are multiple matches, then you will need to provide the path
+If there are multiple matches, then you may need to provide the path
 to the package from your SBOPATH (what Gentoo calls the "atom"); for
 instance:
 .IP
@@ -98,6 +98,11 @@ cat:
 # sport cat .
 .IP 
 # sport install --build-only network/w3m
+.IP
+Normally this is not necessary, as \fBsport\fP takes the name you feed
+it and installs the best match. If two packages exist with the same
+name with only the category to differentiate them, then atomic paths
+are a must. Otherwise, just the package name ought to do.
 .TP
 .B install, --install, i, -i
 Downloads the source code (if needed) and executes the SlackBuild for
@@ -110,14 +115,14 @@ provide the path from SBOPATH.
 .IP
 You can provide a single package name or a list of packages:
 .IP
-# sport install python-daemon numpy network/w3m
+# sport install python-daemon numpy w3m
 .IP
 The \fBinstall\fP option is flexible and can be given an INSTALLER
 variable so that you can control what happens after the code is
 compiled. The default is to call installpkg, but you could use it to
 upgrade packages instead:
 .IP
-# INSTALLER=upgradepkg install network/w3m 
+# INSTALLER=upgradepkg install w3m 
 .IP
 Or even something more complex, like:
 .IP

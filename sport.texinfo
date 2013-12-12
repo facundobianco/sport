@@ -269,11 +269,11 @@ control what happens after the code is compiled. The default is to
 install; ergo, it uses installpkg to builds and then install. However,
 you could use it to upgrade a package:
 
-INSTALLER=upgradepkg sport install network/w3m 
+INSTALLER=upgradepkg sport install w3m 
 
 Or even something more complex, like:
 
-INSTALLER="upgradepkg --install-new" sport i net*/w3m
+INSTALLER="upgradepkg --install-new" sport i w3m
 
 @item clean|--clean|-n|n
 Removes the directory containing the source code and SlackBuild. It of
@@ -314,7 +314,7 @@ conventions to add flexibility to your commands.
 To pass build options through sport, provide the option (usually
 defined in the README of the SlackBuild):
 
-# WIDGETS=yes sport install network/foo 
+# WIDGETS=yes sport install foo 
 
 To pass make flags through sport, use MAKEOPTS:
 
@@ -338,9 +338,8 @@ usually necessary..
 
 Here is an example of a simple queue file for w3m:
 
-development/gc
 imlib2
-network/w3m
+w3m
 
 Save these three lines as w3m.list (or any filename) and then have
 sport process it:
