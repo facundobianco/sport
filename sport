@@ -17,7 +17,7 @@ VERSION=${VERSION:-0.8.2}
 if [ -e /etc/sport.conf ]
 then source /etc/sport.conf
 else
-    SBOPATH=${SBOPATH:-/var/lib/sbopkg/SBo/14.1}
+    SBOPATH=${SBOPATH:-/usr/ports}
     MASTER=${MASTER:-"rsync://slackbuilds.org/slackbuilds/14.1/"}
 fi
 
@@ -159,22 +159,20 @@ cat_finder() {
     # did we get an absolute path?
     SLASH=$(echo $item | grep "/")
 
-    if [ -n "$SLASH" ]; then
+    if [ -z "$SLASH" ]; then
+	# no we need to find the absolute path.
+	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
+	if [ -z $CATEGORY ]; then
+	    echo "File not found."
+	    exit
+	fi
+    else
 	# yes we got an absolute path. parse it.
 	CATEGORY=$(echo $item | cut -f1 -d"/")
 	item=$(echo $item | cut -f2 -d"/")
 	CATEGORY=$(realpath "${SBOPATH}"/$CATEGORY/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
-	if [ -z $CATEGORY ]; then
-	    echo "Error: File not found. Try a search first."
-	    sport s $item
-	    exit
-	fi
-    else
-	# no we need to find the absolute path.
-	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
-	if [ -z $CATEGORY ]; then
-	    echo "Error: File not found. Try a search first."
-	    sport s $item
+	if [ -n $CATEGORY ]; then
+	    echo "File not found."
 	    exit
 	fi
     fi
@@ -335,12 +333,12 @@ while [ True ]; do
 	    fi
 	    cd $CWD
 	fi
-
+#XXX
 	if [ "$cleanmode" -ge 1 ]; then
 	    cat_finder "$item"
-	    rm -r $SBOPATH/$CATEGORY/$PKG_NAME
+	    rm -r $SBOPATH/$CATEGORY/`basename $PKG_NAME .tar.gz`
 	    rm /tmp/$PKG_NAME*SBo*t?z 2> /dev/null
-	    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME.tar.gz \
+	    tar -xf $SBOPATH/$CATEGORY/$PKG_NAME \
 		-C $SBOPATH/$CATEGORY/
 	fi
 
