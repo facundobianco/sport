@@ -161,17 +161,19 @@ cat_finder() {
 
     if [ -z "$SLASH" ]; then
 	# no we need to find the absolute path.
-	CATEGORY=$(realpath "${SBOPATH}"/*/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
+	#echo "Auto-detecting category..."
+	CATEGORY=$(find "${SBOPATH}" -name "${item}" | rev | cut -f2 -d"/" | rev)
 	if [ -z $CATEGORY ]; then
 	    echo "File not found."
 	    exit
 	fi
     else
 	# yes we got an absolute path. parse it.
+	#echo "Resolving category..."
 	CATEGORY=$(echo $item | cut -f1 -d"/")
 	item=$(echo $item | cut -f2 -d"/")
 	CATEGORY=$(realpath "${SBOPATH}"/$CATEGORY/"${item}".tar.gz | rev | cut -f2 -d"/" | rev)
-	if [ -n $CATEGORY ]; then
+	if [ -z $CATEGORY ]; then
 	    echo "File not found."
 	    exit
 	fi
